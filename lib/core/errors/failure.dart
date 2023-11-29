@@ -14,6 +14,10 @@ class ApiFailure extends Failure {
   const ApiFailure({required super.message, required super.statusCode});
 }
 
+class NetworkFailure extends Failure {
+  const NetworkFailure({required super.message, required super.statusCode});
+}
+
 class CacheFailure extends Failure {
   const CacheFailure({required super.message, required super.statusCode});
 }
