@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-class Movie extends Equatable {
+class MovieEntity extends Equatable {
   final bool adult;
   final String backdropPath;
   final List<int> genreIds;
@@ -16,7 +16,7 @@ class Movie extends Equatable {
   final double voteAverage;
   final int voteCount;
 
-  const Movie({
+  const MovieEntity({
     required this.adult,
     required this.backdropPath,
     required this.genreIds,

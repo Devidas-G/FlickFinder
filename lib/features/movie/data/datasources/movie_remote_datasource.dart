@@ -5,13 +5,13 @@ import 'package:flickfinder/features/movie/data/models/movie_model.dart';
 import 'package:http/http.dart' as http;
 
 import '../../../../core/errors/exception.dart';
-import '../../domain/entities/movie.dart';
+import '../../domain/entities/movie_entity.dart';
 
 abstract class MovieRemoteDatasource {
   /// Calls the https://api.themoviedb.org/3/movie/popular endpoint.
   ///
   /// Throws a [ApiException] for all error codes
-  Future<List<MovieModel>> getPopularMovies(int page);
+  Future<List<MovieModel>> getMovies(int page, int genreId);
 }
 
 class MovieRemoteDatasourceImpl implements MovieRemoteDatasource {
@@ -20,10 +20,11 @@ class MovieRemoteDatasourceImpl implements MovieRemoteDatasource {
   MovieRemoteDatasourceImpl({required this.client});
 
   @override
-  Future<List<MovieModel>> getPopularMovies(int page) =>
-      getMoviesfromUrl("${ApiConfig.popularMovies}");
+  Future<List<MovieModel>> getMovies(int page, int genreId) =>
+      getMoviesfromUrl("${ApiConfig.movies}?with_genres=$genreId&page=$page");
 
   Future<List<MovieModel>> getMoviesfromUrl(String url) async {
+    print(url);
     List<MovieModel> movies = [];
     final response = await client.get(
       Uri.parse(url),

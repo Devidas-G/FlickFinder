@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flickfinder/features/movie/data/models/movie_model.dart';
 
 import '../../../../core/errors/exception.dart';
-import '../../domain/entities/movie.dart';
+import '../../domain/entities/movie_entity.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class MovieLocalDatasource {

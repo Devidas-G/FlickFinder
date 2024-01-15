@@ -1,6 +1,6 @@
-import '../../domain/entities/movie.dart';
+import '../../domain/entities/movie_entity.dart';
 
-class MovieModel extends Movie {
+class MovieModel extends MovieEntity {
   const MovieModel(
       {required super.adult,
       required super.backdropPath,
