@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flickfinder/features/movie/domain/entities/movie_entity.dart';
+import 'package:flickfinder/features/movie/domain/usecases/getfilteredmovies.dart';
 import 'package:flickfinder/features/movie/domain/usecases/getmovies.dart';
 import 'package:flickfinder/features/movie/providers/moviesprovider.dart';
 
@@ -16,10 +17,14 @@ const String CACHE_FAILURE_MESSAGE = 'Cache Failure';
 
 class MovieBloc extends Bloc<MovieEvent, MovieState> {
   final GetMovies getMovies;
-  bool hasReachedMax = false;
+  final GetFilteredMovies getFilteredMovies;
   final int numberOfPostsPerRequest = 5;
-  MovieBloc({required this.getMovies}) : super(MovieInitial()) {
+  MovieBloc({
+    required this.getMovies,
+    required this.getFilteredMovies,
+  }) : super(MovieInitial()) {
     on<GetMoviesEvent>(_mapGetMoviesEventToState);
+    on<GetFilteredMoviesEvent>(_mapGetFilteredMoviesEventToState);
   }
 
   Future<void> _mapGetMoviesEventToState(
@@ -27,14 +32,28 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
     Emitter<MovieState> emit,
   ) async {
     emit(MovieLoading());
-    print("page:${event.page}");
-    final result = await getMovies(GetMoviesParams(event.page, event.genreId));
+    final result = await getMovies(GetMoviesParams(event.page));
 
     result.fold(
       (failure) => emit(MovieError(failure.statusCode,
           message: mapFailureToMessage(failure))),
       (movieslist) {
-        hasReachedMax = movieslist.length < numberOfPostsPerRequest;
+        emit(MovieLoaded(movies: movieslist));
+      },
+    );
+  }
+
+  Future<void> _mapGetFilteredMoviesEventToState(
+    GetFilteredMoviesEvent event,
+    Emitter<MovieState> emit,
+  ) async {
+    emit(MovieLoading());
+    final result =
+        await getFilteredMovies(GetFilteredMoviesParams(event.page, event.url));
+    result.fold(
+      (failure) => emit(MovieError(failure.statusCode,
+          message: mapFailureToMessage(failure))),
+      (movieslist) {
         emit(MovieLoaded(movies: movieslist));
       },
     );

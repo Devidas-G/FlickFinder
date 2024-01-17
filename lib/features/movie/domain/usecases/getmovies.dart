@@ -10,12 +10,11 @@ class GetMovies implements UseCase<List<MovieEntity>, GetMoviesParams> {
 
   @override
   ResultFuture<List<MovieEntity>> call(GetMoviesParams params) async {
-    return await repository.getMovies(params.page, params.genreId);
+    return await repository.getMovies(params.page);
   }
 }
 
 class GetMoviesParams {
   final int page;
-  final int genreId;
-  GetMoviesParams(this.page, this.genreId);
+  GetMoviesParams(this.page);
 }

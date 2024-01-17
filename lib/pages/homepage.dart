@@ -1,5 +1,6 @@
 import 'package:flickfinder/core/common/homepagestateprovider.dart';
 import 'package:flickfinder/features/movie/presentation/pages/movie_page.dart';
+import 'package:flickfinder/pages/explore_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -18,15 +19,13 @@ class _HomepageState extends State<Homepage> {
   Widget build(BuildContext context) {
     homeState = Provider.of<HomeState>(context);
     return Scaffold(
-      appBar: AppBar(),
-      drawer: Drawer(),
       body: PageView(
         controller: _pageViewController,
         children: [
+          ExplorePage(),
           Container(
-            child: Center(child: Text("TV Shows")),
+            child: Center(child: Text("Account")),
           ),
-          MoviePage(),
         ],
         onPageChanged: (index) {
           homeState.pageindex = index;
@@ -41,11 +40,11 @@ class _HomepageState extends State<Homepage> {
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.tv),
-            label: 'TV Shows',
+            label: 'Explore',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.movie_sharp),
-            label: 'Movies',
+            icon: Icon(Icons.person),
+            label: 'Account',
           ),
         ],
       ),

@@ -1,5 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flickfinder/core/common/api_config.dart';
+import 'package:flickfinder/features/filter/presentation/pages/filter_options.dart';
+import 'package:flickfinder/features/movie/presentation/widgets/movie_card.dart';
 import 'package:flickfinder/features/movie/providers/moviesprovider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,6 +12,8 @@ import '../widgets/loading_widget.dart';
 import '../widgets/message_display.dart';
 
 class MoviePage extends StatefulWidget {
+  const MoviePage({super.key});
+
   @override
   createState() => _MoviePage();
 }
@@ -22,33 +26,61 @@ class _MoviePage extends State<MoviePage> {
   void initState() {
     super.initState();
     movieBloc = sl<MovieBloc>();
-    // Add a listener to the scroll controller
     _scrollController.addListener(() {
       // Check if the user has scrolled to the end of the list
       if (_scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent) {
         // Trigger your function when reaching the end
-        _loadMovies(moviesProvider.moviesPage);
+        _triggerMoviesEvents();
       }
     });
   }
 
+  void _triggerMoviesEvents() {
+    if (moviesProvider.isFiltered) {
+      _loadFilteredMovies(moviesProvider.moviesPage, moviesProvider.filterUrl);
+    } else {
+      _loadMovies(moviesProvider.moviesPage);
+    }
+  }
+
   void _loadMovies(int page) {
     if (movieBloc.isClosed) return;
-    movieBloc.add(GetMoviesEvent(28, page));
+    moviesProvider.isFiltered = false;
+    movieBloc.add(GetMoviesEvent(page));
+  }
+
+  void _loadFilteredMovies(int page, String url) {
+    if (movieBloc.isClosed) return;
+    moviesProvider.filterUrl = url;
+    moviesProvider.isFiltered = true;
+    movieBloc.add(GetFilteredMoviesEvent(page, url));
+  }
+
+  void _resetMoviesData() {
+    moviesProvider.moviesPage = 1;
+    moviesProvider.moviesList = [];
   }
 
   @override
   Widget build(BuildContext context) {
     moviesProvider = Provider.of<MoviesProvider>(context);
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        (() {
-          if (moviesProvider.moviesList.isEmpty) {
-            return buildBody(context, moviesProvider);
-          } else {
-            return Expanded(
+    return (() {
+      if (moviesProvider.moviesList.isEmpty) {
+        return stateBloc(context, moviesProvider);
+      } else {
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+              child: FilterOptions(
+                onPressed: (url) {
+                  _resetMoviesData();
+                  _loadFilteredMovies(moviesProvider.moviesPage, url);
+                },
+              ),
+            ),
+            Expanded(
               child: Scrollbar(
                 thumbVisibility: true,
                 trackVisibility: true,
@@ -56,7 +88,7 @@ class _MoviePage extends State<MoviePage> {
                 controller: _scrollController,
                 child: ListView(controller: _scrollController, children: [
                   GridView.builder(
-                    physics: NeverScrollableScrollPhysics(),
+                    physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
@@ -68,46 +100,21 @@ class _MoviePage extends State<MoviePage> {
                     itemCount: moviesProvider.moviesList.length,
                     itemBuilder: (context, index) {
                       final movie = moviesProvider.moviesList[index];
-                      return Card(
-                        child: Column(
-                          children: [
-                            Expanded(
-                              child: CachedNetworkImage(
-                                // Replace 'imagePath' with the actual property name for the image URL
-                                imageUrl: ApiConfig.imgHost + movie.posterPath,
-                                fit: BoxFit.cover,
-                                placeholder: (context, url) =>
-                                    CircularProgressIndicator(),
-                                errorWidget: (context, url, error) =>
-                                    Icon(Icons.error),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                movie.title,
-                                style: TextStyle(
-                                    fontSize: 16.0,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
+                      return MovieCard(movie: movie);
                     },
                   ),
-                  buildBody(context, moviesProvider)
+                  stateBloc(context, moviesProvider)
                 ]),
               ),
-            );
-          }
-        }()),
-      ],
-    );
+            ),
+          ],
+        );
+      }
+    }());
   }
 }
 
-BlocProvider<MovieBloc> buildBody(
+BlocProvider<MovieBloc> stateBloc(
     BuildContext context, MoviesProvider moviesProvider) {
   MovieBloc movieBloc = sl<MovieBloc>();
   return BlocProvider(
@@ -116,7 +123,8 @@ BlocProvider<MovieBloc> buildBody(
       child: BlocBuilder<MovieBloc, MovieState>(
         builder: (BuildContext context, MovieState state) {
           if (state is MovieInitial) {
-            movieBloc.add(GetMoviesEvent(28, moviesProvider.moviesPage));
+            print("initial");
+            movieBloc.add(GetMoviesEvent(moviesProvider.moviesPage));
             return const LoadingWidget(
               message: "Initializing",
             );
@@ -128,7 +136,7 @@ BlocProvider<MovieBloc> buildBody(
             Future.delayed(Duration.zero, () {
               moviesProvider.addAllMovies(state.movies);
             });
-            return Icon(Icons.tv);
+            return const Icon(Icons.tv);
           } else if (state is MovieError) {
             return MessageDisplay(
               message: state.message,

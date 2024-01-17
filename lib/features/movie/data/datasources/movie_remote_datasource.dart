@@ -11,7 +11,8 @@ abstract class MovieRemoteDatasource {
   /// Calls the https://api.themoviedb.org/3/movie/popular endpoint.
   ///
   /// Throws a [ApiException] for all error codes
-  Future<List<MovieModel>> getMovies(int page, int genreId);
+  Future<List<MovieModel>> getMovies(int page);
+  Future<List<MovieModel>> getFilteredMovies(String url, int page);
 }
 
 class MovieRemoteDatasourceImpl implements MovieRemoteDatasource {
@@ -20,8 +21,12 @@ class MovieRemoteDatasourceImpl implements MovieRemoteDatasource {
   MovieRemoteDatasourceImpl({required this.client});
 
   @override
-  Future<List<MovieModel>> getMovies(int page, int genreId) =>
-      getMoviesfromUrl("${ApiConfig.movies}?with_genres=$genreId&page=$page");
+  Future<List<MovieModel>> getMovies(int page) =>
+      getMoviesfromUrl("${ApiConfig.movies}?page=$page");
+
+  @override
+  Future<List<MovieModel>> getFilteredMovies(String url, int page) =>
+      getMoviesfromUrl("${ApiConfig.movies}?page=$page&$url");
 
   Future<List<MovieModel>> getMoviesfromUrl(String url) async {
     print(url);

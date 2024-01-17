@@ -1,6 +1,7 @@
 import 'package:flickfinder/features/movie/data/datasources/movie_local_datasource.dart';
 import 'package:flickfinder/features/movie/data/datasources/movie_remote_datasource.dart';
 import 'package:flickfinder/features/movie/data/repositories/movie_repo_impl.dart';
+import 'package:flickfinder/features/movie/domain/usecases/getfilteredmovies.dart';
 import 'package:flickfinder/features/movie/domain/usecases/getmovies.dart';
 import 'package:flickfinder/features/movie/presentation/bloc/movie_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -23,10 +24,11 @@ Future<void> init() async {
 
   //! Features - Movie
   // Bloc
-  sl.registerFactory(() => MovieBloc(getMovies: sl()));
+  sl.registerFactory(() => MovieBloc(getMovies: sl(), getFilteredMovies: sl()));
 
   // Use cases
   sl.registerLazySingleton(() => GetMovies(sl()));
+  sl.registerLazySingleton(() => GetFilteredMovies(sl()));
 
   // Repository
   sl.registerLazySingleton<MovieRepo>(() => MovieRepoImpl(
