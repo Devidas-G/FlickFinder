@@ -1,6 +1,6 @@
 import 'package:flickfinder/core/common/config_service.dart';
 import 'package:flickfinder/core/common/homepagestateprovider.dart';
-import 'package:flickfinder/features/movie/providers/moviesprovider.dart';
+import 'package:flickfinder/features/explore/providers/mediaprovider.dart';
 import 'package:flickfinder/pages/homepage.dart';
 import 'package:flutter/material.dart';
 import 'package:flickfinder/injection_container.dart' as di;

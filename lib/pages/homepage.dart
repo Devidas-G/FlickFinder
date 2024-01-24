@@ -1,6 +1,5 @@
 import 'package:flickfinder/core/common/homepagestateprovider.dart';
-import 'package:flickfinder/features/movie/presentation/pages/movie_page.dart';
-import 'package:flickfinder/pages/explore_page.dart';
+import 'package:flickfinder/features/explore/presentation/pages/explore_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

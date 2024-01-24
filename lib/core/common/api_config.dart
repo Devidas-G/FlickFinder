@@ -3,6 +3,7 @@ class ApiConfig {
   static const String imgHost = 'https://image.tmdb.org/t/p/original';
   static const String basePath = '/3/discover';
   static const String movies = "$apiHost$basePath/movie";
+  static const String tvShows = "$apiHost$basePath/tv";
   static const String popularMovies = "$movies/popular";
 
   static Map<String, String> getHeaders() {

@@ -1,13 +1,12 @@
 import 'dart:convert';
 
-import 'package:flickfinder/features/movie/data/models/movie_model.dart';
+import 'package:flickfinder/features/explore/data/models/movie_model.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../../../fixtures/fixture_reader.dart';
 
 void main() {
   const movieModel = MovieModel(
-      adult: false,
       backdropPath: "/xgGGinKRL8xeRkaAR9RMbtyk60y.jpg",
       genreIds: [16, 10751, 10402, 14, 35],
       id: 901362,
