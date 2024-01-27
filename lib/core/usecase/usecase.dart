@@ -1,11 +1,12 @@
+import 'package:equatable/equatable.dart';
+
 import '../utils/typedef.dart';
 
-abstract class UseCaseWithParams<Type, Params> {
-  const UseCaseWithParams();
+abstract class UseCase<Type, Params> {
   ResultFuture<Type> call(Params params);
 }
 
-abstract class UseCaseWithoutParams<Type> {
-  const UseCaseWithoutParams();
-  ResultFuture<Type> call();
+class NoParams extends Equatable {
+  @override
+  List<Object> get props => [];
 }
