@@ -13,9 +13,14 @@ class FilterBloc extends Bloc<FilterEvent, FilterState> {
     GetFilterOptions event,
     Emitter<FilterState> emit,
   ) async {
-    print(event.filterParameters);
     emit(state.copyWith(
-        status: FilterStatus.loaded,
+        status: FilterStatus.loading,
         message: "${event.filterParameters.name}"));
+    await Future.delayed(Duration(seconds: 2), () {
+      emit(state.copyWith(
+          status: FilterStatus.loaded,
+          filterParameters: event.filterParameters,
+          message: "${event.filterParameters.name}"));
+    });
   }
 }

@@ -1,18 +1,18 @@
-part of 'movie_bloc.dart';
+part of 'media_bloc.dart';
 
-enum MovieStatus { initial, loading, loaded, error }
+enum MediaStatus { initial, loading, loaded, error }
 
-final class MovieState extends Equatable {
-  const MovieState(
-      {this.status = MovieStatus.initial,
-      this.movies = const <MediaEntity>[],
+final class MediaState extends Equatable {
+  const MediaState(
+      {this.status = MediaStatus.initial,
+      this.media = const <MediaEntity>[],
       this.hasReachedMax = false,
       this.statusCode = 0,
       this.message = "",
       this.currentPage = 0,
       this.mediaType = MediaType.Movies});
-  final MovieStatus status;
-  final List<MediaEntity> movies;
+  final MediaStatus status;
+  final List<MediaEntity> media;
   final bool hasReachedMax;
   final int statusCode;
   final int currentPage;
@@ -22,7 +22,7 @@ final class MovieState extends Equatable {
   @override
   List<Object> get props => [
         status,
-        movies,
+        media,
         hasReachedMax,
         statusCode,
         message,
@@ -30,18 +30,18 @@ final class MovieState extends Equatable {
         mediaType
       ];
 
-  MovieState copyWith({
-    MovieStatus? status,
-    List<MediaEntity>? movies,
+  MediaState copyWith({
+    MediaStatus? status,
+    List<MediaEntity>? media,
     bool? hasReachedMax,
     int? statusCode,
     String? message,
     int? currentPage,
     MediaType? mediaType,
   }) {
-    return MovieState(
+    return MediaState(
       status: status ?? this.status,
-      movies: movies ?? this.movies,
+      media: media ?? this.media,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       statusCode: statusCode ?? this.statusCode,
       message: message ?? this.message,
@@ -52,6 +52,6 @@ final class MovieState extends Equatable {
 
   @override
   String toString() {
-    return '''PostState { status: $status, hasReachedMax: $hasReachedMax, movies: ${movies.length}, statusCode: $statusCode, message: $message, currentPage: $currentPage, MediaType: $mediaType}''';
+    return '''PostState { status: $status, hasReachedMax: $hasReachedMax, mediaLength: ${media.length}, statusCode: $statusCode, message: $message, currentPage: $currentPage, MediaType: $mediaType}''';
   }
 }

@@ -1,6 +1,6 @@
+import 'package:flickfinder/bootstrap.dart';
 import 'package:flickfinder/core/common/config_service.dart';
 import 'package:flickfinder/core/common/homepagestateprovider.dart';
-import 'package:flickfinder/features/explore/providers/mediaprovider.dart';
 import 'package:flickfinder/pages/homepage.dart';
 import 'package:flutter/material.dart';
 import 'package:flickfinder/injection_container.dart' as di;
@@ -10,10 +10,12 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await ConfigService.initialize();
   await di.init();
-  runApp(MyApp());
+  bootstrap(() => const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -21,15 +23,12 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (context) => HomeState(),
         ),
-        ChangeNotifierProvider(
-          create: (context) => MoviesProvider(),
-        ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        title: 'Number Trivia',
+        title: 'Flick Finder',
         theme: ThemeData(
-            appBarTheme: AppBarTheme(
+            appBarTheme: const AppBarTheme(
                 backgroundColor: Colors.white,
                 elevation: 0,
                 iconTheme: IconThemeData(
@@ -38,14 +37,14 @@ class MyApp extends StatelessWidget {
                 titleTextStyle: TextStyle(
                     color: Colors.black, fontSize: 21) // Change app bar color
                 ),
-            textTheme: TextTheme(
+            textTheme: const TextTheme(
               titleLarge: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
               bodyMedium: TextStyle(fontSize: 16),
             ),
-            tabBarTheme: TabBarTheme(
+            tabBarTheme: const TabBarTheme(
               labelColor: Colors.black,
               unselectedLabelColor: Colors.grey,
             ),

@@ -6,17 +6,17 @@ import '../../../../core/errors/exception.dart';
 import '../../domain/entities/media_entity.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-abstract class MovieLocalDatasource {
+abstract class MediaLocalDatasource {
   Future<List<MovieModel>> getLastPopularMovies();
   Future<void> cachePopularMovies({required List<MovieModel> movies});
 }
 
 const CACHED_MOVIES = "CACHED_MOVIES";
 
-class MovieLocalDatasourceImpl implements MovieLocalDatasource {
+class MediaLocalDatasourceImpl implements MediaLocalDatasource {
   final SharedPreferences sharedPreferences;
 
-  MovieLocalDatasourceImpl({required this.sharedPreferences});
+  MediaLocalDatasourceImpl({required this.sharedPreferences});
   @override
   Future<List<MovieModel>> getLastPopularMovies() {
     final encodedList = sharedPreferences.getStringList(CACHED_MOVIES);

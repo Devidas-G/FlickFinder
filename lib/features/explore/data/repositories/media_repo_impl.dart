@@ -3,8 +3,8 @@ import 'package:flickfinder/core/errors/exception.dart';
 import 'package:flickfinder/core/platform/network_info.dart';
 import 'package:flickfinder/core/utils/enum.dart';
 import 'package:flickfinder/core/utils/typedef.dart';
-import 'package:flickfinder/features/explore/data/datasources/movie_local_datasource.dart';
-import 'package:flickfinder/features/explore/data/datasources/explore_remote_datasource.dart';
+import 'package:flickfinder/features/explore/data/datasources/media_local_datasource.dart';
+import 'package:flickfinder/features/explore/data/datasources/media_remote_datasource.dart';
 import 'package:flickfinder/features/explore/data/models/movie_model.dart';
 import 'package:flickfinder/features/explore/data/models/tvshow_model.dart';
 import 'package:flickfinder/features/explore/domain/entities/media_entity.dart';
@@ -16,8 +16,8 @@ typedef Future<List<MovieModel>> _MovieDataSource();
 typedef Future<List<TvShowModel>> _TvShowDataSource();
 
 class MediaRepoImpl implements MediaRepo {
-  final MovieLocalDatasource localDatasource;
-  final MovieRemoteDatasource remoteDatasource;
+  final MediaLocalDatasource localDatasource;
+  final MediaRemoteDatasource remoteDatasource;
   final NetworkInfo networkInfo;
 
   MediaRepoImpl(

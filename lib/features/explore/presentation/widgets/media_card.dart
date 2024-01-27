@@ -1,12 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 import '../../../../core/common/api_config.dart';
 import '../../domain/entities/media_entity.dart';
 
 class MediaCard extends StatelessWidget {
-  final MediaEntity movie;
-  const MediaCard({super.key, required this.movie});
+  final MediaEntity media;
+  const MediaCard({super.key, required this.media});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +22,7 @@ class MediaCard extends StatelessWidget {
           Expanded(
             child: CachedNetworkImage(
               // Replace 'imagePath' with the actual property name for the image URL
-              imageUrl: ApiConfig.imgHost + movie.posterPath,
+              imageUrl: ApiConfig.imgHost + media.posterPath,
               fit: BoxFit.cover,
               placeholder: (context, url) => Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -38,14 +39,14 @@ class MediaCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  movie.title,
+                  media.title,
                   style: TextStyle(
                     fontSize: 16.0,
                     fontWeight: FontWeight.bold,
                   ),
                   maxLines: 1,
                 ),
-                Text(movie.releaseDate),
+                Text(media.releaseDate),
                 //Text(movie.popularity.toString()),
               ],
             ),

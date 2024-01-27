@@ -9,7 +9,7 @@ import 'package:http/http.dart' as http;
 import '../../../../core/errors/exception.dart';
 import '../../domain/entities/media_entity.dart';
 
-abstract class MovieRemoteDatasource {
+abstract class MediaRemoteDatasource {
   /// Calls the https://api.themoviedb.org/3/movie/popular endpoint.
   ///
   /// Throws a [ApiException] for all error codes
@@ -18,10 +18,10 @@ abstract class MovieRemoteDatasource {
   Future<List<MovieModel>> getFilteredMovies(String url, int page);
 }
 
-class MovieRemoteDatasourceImpl implements MovieRemoteDatasource {
+class MediaRemoteDatasourceImpl implements MediaRemoteDatasource {
   final http.Client client;
 
-  MovieRemoteDatasourceImpl({required this.client});
+  MediaRemoteDatasourceImpl({required this.client});
 
   @override
   Future<List<MovieModel>> getMovies(int page) =>

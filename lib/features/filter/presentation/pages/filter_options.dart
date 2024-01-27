@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/utils/enum.dart';
 import '../../../../injection_container.dart';
 import '../widgets/loading_widget.dart';
+import '../widgets/message_display.dart';
 
 class FilterOptions extends StatefulWidget {
   final Function(String) onApply;
@@ -33,17 +34,17 @@ class _FilterOptions extends State<FilterOptions> {
 
   void showFilterBottomSheet(
       BuildContext builderContext, Function(String) onApply) {
-    showDialog<void>(
+    showModalBottomSheet<void>(
       context: builderContext,
-      // isScrollControlled: true,
-      // shape: const RoundedRectangleBorder(
-      //   borderRadius: BorderRadius.only(
-      //     topRight: Radius.circular(20),
-      //     topLeft: Radius.circular(20),
-      //   ),
-      // ),
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topRight: Radius.circular(20),
+          topLeft: Radius.circular(20),
+        ),
+      ),
       builder: (_) {
-        return Dialog(child: _buildFilterBottomSheet(builderContext, onApply));
+        return _buildFilterBottomSheet(builderContext, onApply);
       },
     );
   }
@@ -110,22 +111,26 @@ class _FilterOptions extends State<FilterOptions> {
       BuildContext context, void Function(void Function()) setState) {
     return ListView(
       children: FilterParameters.values.map((parameter) {
-        return ListTile(
-          selected: _selectedParameters == parameter,
-          selectedTileColor: Colors.grey,
-          onTap: () {
-            setState(() {
-              _selectedParameters = parameter;
-            });
-            _triggerEvent(parameter);
-          },
-          title: AutoSizeText(
-            parameter.name,
-            style: TextStyle(
-              fontSize: 16.0,
-              fontWeight: FontWeight.bold,
+        return Card(
+          elevation: 0,
+          margin: EdgeInsets.zero,
+          child: ListTile(
+            selected: _selectedParameters == parameter,
+            selectedTileColor: Colors.grey,
+            onTap: () {
+              setState(() {
+                _selectedParameters = parameter;
+              });
+              _triggerEvent(parameter);
+            },
+            title: AutoSizeText(
+              parameter.name,
+              style: TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.bold,
+              ),
+              maxLines: 1,
             ),
-            maxLines: 1,
           ),
         );
       }).toList(),
@@ -212,19 +217,50 @@ class _FilterOptions extends State<FilterOptions> {
 BlocProvider<FilterBloc> buildBody(
     BuildContext builderContext, FilterBloc filterBloc) {
   return BlocProvider.value(
-    value: builderContext.watch<FilterBloc>(),
+    value: builderContext.read<FilterBloc>(),
     child: BlocBuilder<FilterBloc, FilterState>(
       builder: (BuildContext context, FilterState state) {
-        if (state.status == FilterStatus.initial) {
-          return const LoadingWidget(
-            message: "Initializing",
-          );
-        } else {
-          return Center(
-            child: Text(state.message),
-          );
+        switch (state.status) {
+          case FilterStatus.initial:
+            return const LoadingWidget(
+              message: "Initializing",
+            );
+          case FilterStatus.loading:
+            return const LoadingWidget(
+              message: "Loading",
+            );
+          case FilterStatus.loaded:
+            return buildFilterWidget(state);
+          case FilterStatus.error:
+            return MessageDisplay(
+              message: state.message,
+              code: state.statusCode,
+            );
+          default:
+            return const MessageDisplay(
+              message: "something went wrong",
+              code: 0,
+            );
         }
       },
     ),
   );
+}
+
+Widget buildFilterWidget(FilterState state) {
+  switch (state.filterParameters) {
+    case FilterParameters.Genres:
+      return Container(
+        color: Colors.red,
+      );
+    case FilterParameters.ReleaseDate:
+      return Container(
+        child: Text("kksd"),
+      );
+    default:
+      return const MessageDisplay(
+        message: "Please select a option",
+        code: 0,
+      );
+  }
 }

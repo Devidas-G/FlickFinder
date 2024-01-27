@@ -15,7 +15,7 @@ final class FilterState extends Equatable {
   final FilterParameters filterParameters;
 
   @override
-  List<Object> get props => [];
+  List<Object> get props => [status, statusCode, message, filterParameters];
 
   FilterState copyWith({
     FilterStatus? status,
