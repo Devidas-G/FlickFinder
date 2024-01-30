@@ -1,3 +1,4 @@
+import 'package:flickfinder/features/media/domain/usecases/getfilteredmedia.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
@@ -31,7 +32,11 @@ class _MediaBuilderState extends State<MediaBuilder> {
   }
 
   void _onScroll() {
-    if (_isBottom) mediaBloc.add(GetMediaEvent(mediaBloc.state.mediaType));
+    if (_isBottom) {
+      final GetFilteredMediaParams getFilteredMediaParams =
+          mediaBloc.state.getFilteredMediaParams;
+      mediaBloc.add(GetMoreMediaEvent());
+    }
   }
 
   bool get _isBottom {
@@ -64,7 +69,7 @@ class _MediaBuilderState extends State<MediaBuilder> {
             return PagedGridView<int, MediaEntity>(
               cacheExtent: 9999,
               showNewPageProgressIndicatorAsGridChild: false,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3,
                   crossAxisSpacing:
                       1, // Adjust spacing between grid items horizontally
@@ -75,9 +80,28 @@ class _MediaBuilderState extends State<MediaBuilder> {
                   return MediaCard(media: media);
                 },
                 noItemsFoundIndicatorBuilder: (context) {
-                  return const LoadingWidget(
-                    message: "Loading",
-                  );
+                  switch (state.status) {
+                    case MediaStatus.loading:
+                      return const LoadingWidget(
+                        message: "Loading",
+                      );
+                    case MediaStatus.error:
+                      return MessageDisplay(
+                        message: state.message,
+                        code: state.statusCode,
+                      );
+                    case MediaStatus.loaded:
+                      if (state.media.isEmpty) {
+                        return const Center(child: Text('no more media'));
+                      } else {
+                        return Icon(Icons.tv);
+                      }
+                    default:
+                      return const MessageDisplay(
+                        message: "something went wrong",
+                        code: 0,
+                      );
+                  }
                 },
                 newPageProgressIndicatorBuilder: (context) {
                   switch (state.status) {

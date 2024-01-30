@@ -9,6 +9,7 @@ import 'package:flickfinder/features/media/data/models/movie_model.dart';
 import 'package:flickfinder/features/media/data/models/tvshow_model.dart';
 import 'package:flickfinder/features/media/domain/entities/media_entity.dart';
 import 'package:flickfinder/features/media/domain/repositories/media_repo.dart';
+import 'package:flickfinder/features/media/domain/usecases/getfilteredmedia.dart';
 
 import '../../../../core/errors/failure.dart';
 
@@ -37,22 +38,12 @@ class MediaRepoImpl implements MediaRepo {
 
   @override
   ResultFuture<List<MediaEntity>> getFilteredMedia(
-      MediaType mediaType,
-      int page,
-      int genre,
-      String primaryReleaseDateGTE,
-      String primaryReleaseDateLTE,
-      double voteAverageGTE,
-      String language,
-      String certificationCountry,
-      String certification,
-      int castId,
-      String region,
-      int year) async {
-    if (mediaType == MediaType.Movies) {
-      return await _getMovie(() => remoteDatasource.getFilteredMovies());
+      GetFilteredMediaParams params) async {
+    if (params.mediaType == MediaType.Movies) {
+      return await _getMovie(() => remoteDatasource.getFilteredMovies(params));
     } else {
-      return await _getTvShow(() => remoteDatasource.getFilteredTvShows());
+      return await _getTvShow(
+          () => remoteDatasource.getFilteredTvShows(params));
     }
   }
 

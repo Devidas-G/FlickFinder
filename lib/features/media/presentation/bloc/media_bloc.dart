@@ -29,26 +29,16 @@ class MediaBloc extends Bloc<MediaEvent, MediaState> {
     required this.getMedia,
     required this.getFilteredMedia,
   }) : super(const MediaState()) {
-    on<GetMediaEvent>(_mapGetMediaEventToState,
+    on<GetMediaWithParamsEvent>(_mapGetFilterMediaEventToState,
         transformer: throttleDroppable(throttleDuration));
-    on<GetMediaWithParamsEvent>(_mapGetMediaWithParamsEventToState,
-        transformer: throttleDroppable(throttleDuration));
-    on<GetFilterMediaEvent>(_mapGetFilterMediaEventToState,
+    on<GetMoreMediaEvent>(_mapGetMoreMediaEventToState,
         transformer: throttleDroppable(throttleDuration));
   }
 
-  Future<void> _mapGetMediaEventToState(
-    GetMediaEvent event,
+  Future<void> _mapGetMoreMediaEventToState(
+    GetMoreMediaEvent event,
     Emitter<MediaState> emit,
   ) async {
-    if (event.mediaType != state.mediaType) {
-      emit(state.copyWith(
-          status: MediaStatus.initial,
-          media: [],
-          hasReachedMax: false,
-          currentPage: 0,
-          mediaType: event.mediaType));
-    }
     if (state.status == MediaStatus.loading) return;
     final int newPageKey = state.currentPage + 1;
     if (state.status != MediaStatus.initial) {
@@ -58,9 +48,8 @@ class MediaBloc extends Bloc<MediaEvent, MediaState> {
       ));
     }
 
-    //if (state.status != MovieStatus.initial) return;
-
-    final result = await getMedia(GetMediaParams(newPageKey, event.mediaType));
+    final result = await getFilteredMedia(
+        state.getFilteredMediaParams.copyWith(page: newPageKey));
     result.fold(
         (failure) => emit(state.copyWith(
               status: MediaStatus.error,
@@ -76,55 +65,29 @@ class MediaBloc extends Bloc<MediaEvent, MediaState> {
             media: List.of(state.media)..addAll(medialist),
             hasReachedMax: false,
             currentPage: newPageKey,
-            mediaType: event.mediaType));
+            getFilteredMediaParams:
+                state.getFilteredMediaParams.copyWith(page: newPageKey)));
       }
     });
   }
 
-  Future<void> _mapGetMediaWithParamsEventToState(
-    GetMediaWithParamsEvent event,
-    Emitter<MediaState> emit,
-  ) async {
-    _mapMediaEventToState(event, emit, state.currentPage);
-  }
-
   Future<void> _mapGetFilterMediaEventToState(
-      GetFilterMediaEvent event, Emitter<MediaState> emit) async {
-    _mapMediaEventToState(event, emit, 0);
-  }
-
-  Future<void> _mapMediaEventToState(GetMediaWithParamsEvent event,
-      Emitter<MediaState> emit, int pageKey) async {
-    if (event.mediaType != state.mediaType) {
+      GetMediaWithParamsEvent event, Emitter<MediaState> emit) async {
+    if (event.getFilteredMediaParams.mediaType != state.mediaType) {
       emit(state.copyWith(
-          status: MediaStatus.initial,
-          media: [],
-          hasReachedMax: false,
-          currentPage: 0,
-          mediaType: event.mediaType));
+        status: MediaStatus.initial,
+        media: [],
+      ));
     }
     if (state.status == MediaStatus.loading) return;
-    final int newPageKey = pageKey + 1;
     if (state.status != MediaStatus.initial) {
       emit(state.copyWith(
         status: MediaStatus.loading,
         media: state.media,
       ));
     }
-    final result = await getFilteredMedia(GetFilteredMediaParams(
-      page: newPageKey,
-      mediaType: event.mediaType,
-      genre: event.genre,
-      primaryReleaseDateGTE: event.primaryReleaseDateGTE,
-      primaryReleaseDateLTE: event.primaryReleaseDateLTE,
-      voteAverageGTE: event.voteAverageGTE,
-      language: event.language,
-      certificationCountry: event.certificationCountry,
-      certification: event.certification,
-      castId: event.castId,
-      region: event.region,
-      year: event.year,
-    ));
+    final result =
+        await getFilteredMedia(event.getFilteredMediaParams.copyWith(page: 1));
     result.fold(
         (failure) => emit(state.copyWith(
               status: MediaStatus.error,
@@ -139,8 +102,10 @@ class MediaBloc extends Bloc<MediaEvent, MediaState> {
             status: MediaStatus.loaded,
             media: List.of(state.media)..addAll(medialist),
             hasReachedMax: false,
-            currentPage: newPageKey,
-            mediaType: event.mediaType));
+            currentPage: 1,
+            mediaType: event.getFilteredMediaParams.mediaType,
+            getFilteredMediaParams:
+                event.getFilteredMediaParams.copyWith(page: 1)));
       }
     });
   }

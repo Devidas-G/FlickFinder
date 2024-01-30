@@ -12,47 +12,67 @@ class GetFilteredMedia
 
   @override
   ResultFuture<List<MediaEntity>> call(GetFilteredMediaParams params) async {
-    return await repository.getFilteredMedia(
-        params.mediaType,
-        params.page,
-        params.genre,
-        params.primaryReleaseDateGTE,
-        params.primaryReleaseDateLTE,
-        params.voteAverageGTE,
-        params.language,
-        params.certificationCountry,
-        params.certification,
-        params.castId,
-        params.region,
-        params.year);
+    return await repository.getFilteredMedia(params);
   }
 }
 
 class GetFilteredMediaParams {
-  final int page;
-  final MediaType mediaType;
-  final int genre;
-  final String primaryReleaseDateGTE;
-  final String primaryReleaseDateLTE;
-  final double voteAverageGTE;
-  final String language;
-  final String certificationCountry;
-  final String certification;
-  final int castId;
-  final String region;
-  final int year;
+  final int? page;
+  final MediaType? mediaType;
+  final int? genre;
+  final String? primaryReleaseDateGTE;
+  final String? primaryReleaseDateLTE;
+  final double? voteAverageGTE;
+  final String? language;
+  final String? certificationCountry;
+  final String? certification;
+  final int? castId;
+  final String? region;
+  final int? year;
   const GetFilteredMediaParams({
     this.page = 0,
     this.mediaType = MediaType.Movies,
-    this.genre = 0,
-    this.primaryReleaseDateGTE = "",
-    this.primaryReleaseDateLTE = "",
-    this.voteAverageGTE = 0.0,
-    this.language = "",
-    this.certificationCountry = "",
-    this.certification = "",
-    this.castId = 0,
-    this.region = "",
-    this.year = 0,
+    this.genre,
+    this.primaryReleaseDateGTE,
+    this.primaryReleaseDateLTE,
+    this.voteAverageGTE,
+    this.language,
+    this.certificationCountry,
+    this.certification,
+    this.castId,
+    this.region,
+    this.year,
   });
+
+  GetFilteredMediaParams copyWith({
+    int? page,
+    MediaType? mediaType,
+    int? genre,
+    String? primaryReleaseDateGTE,
+    String? primaryReleaseDateLTE,
+    double? voteAverageGTE,
+    String? language,
+    String? certificationCountry,
+    String? certification,
+    int? castId,
+    String? region,
+    int? year,
+  }) {
+    return GetFilteredMediaParams(
+      page: page ?? this.page,
+      mediaType: mediaType ?? this.mediaType,
+      genre: genre ?? this.genre,
+      primaryReleaseDateGTE:
+          primaryReleaseDateGTE ?? this.primaryReleaseDateGTE,
+      primaryReleaseDateLTE:
+          primaryReleaseDateLTE ?? this.primaryReleaseDateLTE,
+      voteAverageGTE: voteAverageGTE ?? this.voteAverageGTE,
+      language: language ?? this.language,
+      certificationCountry: certificationCountry ?? this.certificationCountry,
+      certification: certification ?? this.certification,
+      castId: castId ?? this.castId,
+      region: region ?? this.region,
+      year: year ?? this.year,
+    );
+  }
 }

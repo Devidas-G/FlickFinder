@@ -4,6 +4,7 @@ import 'package:flickfinder/core/common/api_config.dart';
 import 'package:flickfinder/core/utils/enum.dart';
 import 'package:flickfinder/features/media/data/models/movie_model.dart';
 import 'package:flickfinder/features/media/data/models/tvshow_model.dart';
+import 'package:flickfinder/features/media/domain/usecases/getfilteredmedia.dart';
 import 'package:http/http.dart' as http;
 
 import '../../../../core/errors/exception.dart';
@@ -15,30 +16,8 @@ abstract class MediaRemoteDatasource {
   /// Throws a [ApiException] for all error codes
   Future<List<MovieModel>> getMovies(int page);
   Future<List<TvShowModel>> getTvShows(int page);
-  Future<List<MovieModel>> getFilteredMovies(
-      {int genre,
-      int page,
-      String primaryReleaseDateGTE,
-      String primaryReleaseDateLTE,
-      double voteAverageGTE,
-      String language,
-      String certificationCountry,
-      String certification,
-      int castId,
-      String region,
-      int year});
-  Future<List<TvShowModel>> getFilteredTvShows(
-      {int genre,
-      int page,
-      String primaryReleaseDateGTE,
-      String primaryReleaseDateLTE,
-      double voteAverageGTE,
-      String language,
-      String certificationCountry,
-      String certification,
-      int castId,
-      String region,
-      int year});
+  Future<List<MovieModel>> getFilteredMovies(GetFilteredMediaParams params);
+  Future<List<TvShowModel>> getFilteredTvShows(GetFilteredMediaParams params);
 }
 
 class MediaRemoteDatasourceImpl implements MediaRemoteDatasource {
@@ -54,59 +33,37 @@ class MediaRemoteDatasourceImpl implements MediaRemoteDatasource {
       getTvShowfromUrl("${ApiConfig.tvShows}?page=$page");
 
   @override
-  Future<List<MovieModel>> getFilteredMovies(
-          {int? genre,
-          int? page,
-          String? primaryReleaseDateGTE,
-          String? primaryReleaseDateLTE,
-          double? voteAverageGTE,
-          String? language,
-          String? certificationCountry,
-          String? certification,
-          int? castId,
-          String? region,
-          int? year}) =>
+  Future<List<MovieModel>> getFilteredMovies(GetFilteredMediaParams params) =>
       getMoviefromUrl(getUrlFromParams(
         mediaUrl: ApiConfig.movies,
-        genre: genre,
-        page: page,
-        primaryReleaseDateGTE: primaryReleaseDateGTE,
-        primaryReleaseDateLTE: primaryReleaseDateLTE,
-        voteAverageGTE: voteAverageGTE,
-        language: language,
-        certificationCountry: certificationCountry,
-        certification: certification,
-        castId: castId,
-        region: region,
-        year: year,
+        genre: params.genre,
+        page: params.page,
+        primaryReleaseDateGTE: params.primaryReleaseDateGTE,
+        primaryReleaseDateLTE: params.primaryReleaseDateLTE,
+        voteAverageGTE: params.voteAverageGTE,
+        language: params.language,
+        certificationCountry: params.certificationCountry,
+        certification: params.certification,
+        castId: params.castId,
+        region: params.region,
+        year: params.year,
       ));
 
   @override
-  Future<List<TvShowModel>> getFilteredTvShows(
-          {int? genre,
-          int? page,
-          String? primaryReleaseDateGTE,
-          String? primaryReleaseDateLTE,
-          double? voteAverageGTE,
-          String? language,
-          String? certificationCountry,
-          String? certification,
-          int? castId,
-          String? region,
-          int? year}) =>
+  Future<List<TvShowModel>> getFilteredTvShows(GetFilteredMediaParams params) =>
       getTvShowfromUrl(getUrlFromParams(
         mediaUrl: ApiConfig.tvShows,
-        genre: genre,
-        page: page,
-        primaryReleaseDateGTE: primaryReleaseDateGTE,
-        primaryReleaseDateLTE: primaryReleaseDateLTE,
-        voteAverageGTE: voteAverageGTE,
-        language: language,
-        certificationCountry: certificationCountry,
-        certification: certification,
-        castId: castId,
-        region: region,
-        year: year,
+        genre: params.genre,
+        page: params.page,
+        primaryReleaseDateGTE: params.primaryReleaseDateGTE,
+        primaryReleaseDateLTE: params.primaryReleaseDateLTE,
+        voteAverageGTE: params.voteAverageGTE,
+        language: params.language,
+        certificationCountry: params.certificationCountry,
+        certification: params.certification,
+        castId: params.castId,
+        region: params.region,
+        year: params.year,
       ));
 
   Future<List<MovieModel>> getMoviefromUrl(String url) async {
@@ -162,6 +119,27 @@ class MediaRemoteDatasourceImpl implements MediaRemoteDatasource {
       int? castId,
       String? region,
       int? year}) {
-    return "$mediaUrl?page=$page&with_genres=$genre&primary_release_date.gte=$primaryReleaseDateGTE&primary_release_date.lte=$primaryReleaseDateLTE&vote_average.gte=$voteAverageGTE&with_original_language=$language&certification_country=$certificationCountry&certification=$certification&with_cast=$castId&region=$region&year=$year";
+    String genreUrl = genre == null ? "" : "&with_genres=$genre";
+    String pageUrl = page == null ? "" : "?page=$page";
+    String primaryReleaseDateGTEUrl = primaryReleaseDateGTE == null
+        ? ""
+        : "&primary_release_date.gte=$primaryReleaseDateGTE";
+    String primaryReleaseDateLTEUrl = primaryReleaseDateLTE == null
+        ? ""
+        : "&primary_release_date.lte=$primaryReleaseDateLTE";
+    String voteAverageGTEUrl =
+        voteAverageGTE == null ? "" : "&vote_average.gte=$voteAverageGTE";
+    String languageUrl =
+        language == null ? "" : "&with_original_language=$language";
+    String certificationCountryUrl = certificationCountry == null
+        ? ""
+        : "&certification_country=$certificationCountry";
+    String certificationUrl =
+        certification == null ? "" : "&certification=$certification";
+    String castIdUrl = castId == null ? "" : "&with_cast=$castId";
+    String regionUrl = region == null ? "" : "&region=$region";
+    String yearUrl = year == null ? "" : "&year=$year";
+
+    return "$mediaUrl$pageUrl$genreUrl$primaryReleaseDateGTEUrl$primaryReleaseDateLTEUrl$voteAverageGTEUrl$languageUrl$certificationCountryUrl$certificationUrl$castIdUrl$regionUrl$yearUrl";
   }
 }

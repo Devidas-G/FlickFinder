@@ -22,7 +22,8 @@ class _ExplorePage extends State<ExplorePage> {
   }
 
   _triggerEvent(MediaType mediaType) {
-    mediaBloc.add(GetMediaEvent(mediaType));
+    mediaBloc.add(GetMediaWithParamsEvent(
+        mediaBloc.state.getFilteredMediaParams.copyWith(mediaType: mediaType)));
   }
 
   @override
@@ -44,8 +45,9 @@ class _ExplorePage extends State<ExplorePage> {
         ),
       ),
       body: BlocProvider(
-        create: (context) =>
-            mediaBloc..add(GetMediaEvent(mediaBloc.state.mediaType)),
+        create: (context) => mediaBloc
+          ..add(
+              GetMediaWithParamsEvent(mediaBloc.state.getFilteredMediaParams)),
         child: MediaBuilder(),
       ),
     );
