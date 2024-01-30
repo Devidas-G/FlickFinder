@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flickfinder/features/explore/data/models/movie_model.dart';
+import 'package:flickfinder/features/media/data/models/movie_model.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../../../fixtures/fixture_reader.dart';

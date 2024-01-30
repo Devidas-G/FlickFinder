@@ -1,4 +1,4 @@
-import 'package:flickfinder/features/explore/domain/entities/media_entity.dart';
+import 'package:flickfinder/features/media/domain/entities/media_entity.dart';
 
 class TvShowModel extends MediaEntity {
   const TvShowModel(

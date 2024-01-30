@@ -1,7 +1,7 @@
 import 'package:flickfinder/core/usecase/usecase.dart';
 import 'package:flickfinder/core/utils/typedef.dart';
-import 'package:flickfinder/features/explore/domain/entities/media_entity.dart';
-import 'package:flickfinder/features/explore/domain/repositories/media_repo.dart';
+import 'package:flickfinder/features/media/domain/entities/media_entity.dart';
+import 'package:flickfinder/features/media/domain/repositories/media_repo.dart';
 
 import '../../../../core/utils/enum.dart';
 

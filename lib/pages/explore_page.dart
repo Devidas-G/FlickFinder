@@ -1,16 +1,10 @@
-import 'package:flickfinder/features/explore/presentation/pages/media_builder.dart';
+import 'package:flickfinder/features/media/presentation/pages/media_builder.dart';
 import 'package:flickfinder/features/filter/presentation/pages/filter_options.dart';
-import 'package:flickfinder/features/explore/domain/entities/media_entity.dart';
-import 'package:flickfinder/features/explore/presentation/widgets/media_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
-import 'package:provider/provider.dart';
 import '../core/utils/enum.dart';
 import '../injection_container.dart';
-import '../features/explore/presentation/bloc/media_bloc.dart';
-import '../features/explore/presentation/widgets/loading_widget.dart';
-import '../features/explore/presentation/widgets/message_display.dart';
+import '../features/media/presentation/bloc/media_bloc.dart';
 
 class ExplorePage extends StatefulWidget {
   const ExplorePage({super.key});

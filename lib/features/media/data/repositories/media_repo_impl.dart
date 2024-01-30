@@ -3,12 +3,12 @@ import 'package:flickfinder/core/errors/exception.dart';
 import 'package:flickfinder/core/platform/network_info.dart';
 import 'package:flickfinder/core/utils/enum.dart';
 import 'package:flickfinder/core/utils/typedef.dart';
-import 'package:flickfinder/features/explore/data/datasources/media_local_datasource.dart';
-import 'package:flickfinder/features/explore/data/datasources/media_remote_datasource.dart';
-import 'package:flickfinder/features/explore/data/models/movie_model.dart';
-import 'package:flickfinder/features/explore/data/models/tvshow_model.dart';
-import 'package:flickfinder/features/explore/domain/entities/media_entity.dart';
-import 'package:flickfinder/features/explore/domain/repositories/media_repo.dart';
+import 'package:flickfinder/features/media/data/datasources/media_local_datasource.dart';
+import 'package:flickfinder/features/media/data/datasources/media_remote_datasource.dart';
+import 'package:flickfinder/features/media/data/models/movie_model.dart';
+import 'package:flickfinder/features/media/data/models/tvshow_model.dart';
+import 'package:flickfinder/features/media/domain/entities/media_entity.dart';
+import 'package:flickfinder/features/media/domain/repositories/media_repo.dart';
 
 import '../../../../core/errors/failure.dart';
 
@@ -36,9 +36,24 @@ class MediaRepoImpl implements MediaRepo {
   }
 
   @override
-  ResultFuture<List<MediaEntity>> getFilteredMovies(
-      String url, int page) async {
-    return await _getMovie(() => remoteDatasource.getFilteredMovies(url, page));
+  ResultFuture<List<MediaEntity>> getFilteredMedia(
+      MediaType mediaType,
+      int page,
+      int genre,
+      String primaryReleaseDateGTE,
+      String primaryReleaseDateLTE,
+      double voteAverageGTE,
+      String language,
+      String certificationCountry,
+      String certification,
+      int castId,
+      String region,
+      int year) async {
+    if (mediaType == MediaType.Movies) {
+      return await _getMovie(() => remoteDatasource.getFilteredMovies());
+    } else {
+      return await _getTvShow(() => remoteDatasource.getFilteredTvShows());
+    }
   }
 
   ResultFuture<List<MediaEntity>> _getMovie(
