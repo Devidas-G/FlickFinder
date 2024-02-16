@@ -64,7 +64,6 @@ class _MediaBuilderState extends State<MediaBuilder> {
               message: "Initializing",
             );
           } else {
-            print("length:${state.media.length}");
             _pagingController.itemList = state.media;
             return PagedGridView<int, MediaEntity>(
               cacheExtent: 9999,

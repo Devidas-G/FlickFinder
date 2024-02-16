@@ -1,3 +1,4 @@
+import 'package:flickfinder/features/media/domain/usecases/getfilteredmedia.dart';
 import 'package:flickfinder/features/media/presentation/pages/media_builder.dart';
 import 'package:flickfinder/features/filter/presentation/pages/filter_options.dart';
 import 'package:flutter/material.dart';
@@ -21,9 +22,8 @@ class _ExplorePage extends State<ExplorePage> {
     mediaBloc = sl<MediaBloc>();
   }
 
-  _triggerEvent(MediaType mediaType) {
-    mediaBloc.add(GetMediaWithParamsEvent(
-        mediaBloc.state.getFilteredMediaParams.copyWith(mediaType: mediaType)));
+  _triggerEvent(GetFilteredMediaParams getFilteredMediaParams) {
+    mediaBloc.add(GetMediaWithParamsEvent(getFilteredMediaParams));
   }
 
   @override
@@ -35,11 +35,17 @@ class _ExplorePage extends State<ExplorePage> {
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(40.0),
           child: FilterOptions(
-            onApply: (url) {
-              print(url);
+            onApply: (filterparams) {
+              print("newparams: $filterparams");
+              _triggerEvent(
+                  filterparams.copyWith(mediaType: mediaBloc.state.mediaType));
             },
             onMediaTypeChange: (MediaType? newMediaType) {
-              _triggerEvent(newMediaType!);
+              _triggerEvent(GetFilteredMediaParams(mediaType: newMediaType));
+            },
+            onClear: () {
+              _triggerEvent(
+                  GetFilteredMediaParams(mediaType: mediaBloc.state.mediaType));
             },
           ),
         ),

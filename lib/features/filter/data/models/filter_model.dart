@@ -1,9 +1,6 @@
 import 'package:flickfinder/features/filter/domain/entities/filterentity.dart';
+import 'package:flutter/material.dart';
 
 class FilterModel extends FilterEntity {
-  const FilterModel({required super.title});
-
-  factory FilterModel.fromJson(Map<String, dynamic> json) {
-    return FilterModel(title: json[''] ?? '');
-  }
+  const FilterModel({required super.title, required super.widget});
 }

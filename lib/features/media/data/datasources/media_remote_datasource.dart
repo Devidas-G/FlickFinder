@@ -8,6 +8,7 @@ import 'package:flickfinder/features/media/domain/usecases/getfilteredmedia.dart
 import 'package:http/http.dart' as http;
 
 import '../../../../core/errors/exception.dart';
+import '../../../filter/domain/entities/genreentity.dart';
 import '../../domain/entities/media_entity.dart';
 
 abstract class MediaRemoteDatasource {
@@ -108,7 +109,7 @@ class MediaRemoteDatasourceImpl implements MediaRemoteDatasource {
 
   String getUrlFromParams(
       {required String mediaUrl,
-      int? genre,
+      List<GenreEntity>? genre,
       int? page,
       String? primaryReleaseDateGTE,
       String? primaryReleaseDateLTE,
@@ -119,7 +120,9 @@ class MediaRemoteDatasourceImpl implements MediaRemoteDatasource {
       int? castId,
       String? region,
       int? year}) {
-    String genreUrl = genre == null ? "" : "&with_genres=$genre";
+    List<String> genreIds =
+        genre == null ? [] : genre.map((genre) => genre.id.toString()).toList();
+    String genreUrl = genre == null ? "" : "&with_genres=${genreIds.join(",")}";
     String pageUrl = page == null ? "" : "?page=$page";
     String primaryReleaseDateGTEUrl = primaryReleaseDateGTE == null
         ? ""

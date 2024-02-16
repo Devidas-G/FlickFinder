@@ -73,19 +73,15 @@ class MediaBloc extends Bloc<MediaEvent, MediaState> {
 
   Future<void> _mapGetFilterMediaEventToState(
       GetMediaWithParamsEvent event, Emitter<MediaState> emit) async {
-    if (event.getFilteredMediaParams.mediaType != state.mediaType) {
-      emit(state.copyWith(
-        status: MediaStatus.initial,
-        media: [],
-      ));
-    }
     if (state.status == MediaStatus.loading) return;
-    if (state.status != MediaStatus.initial) {
-      emit(state.copyWith(
-        status: MediaStatus.loading,
-        media: state.media,
-      ));
-    }
+    emit(state.copyWith(
+      status: MediaStatus.initial,
+      media: [],
+    ));
+    emit(state.copyWith(
+      status: MediaStatus.loading,
+      media: state.media,
+    ));
     final result =
         await getFilteredMedia(event.getFilteredMediaParams.copyWith(page: 1));
     result.fold(
@@ -106,6 +102,7 @@ class MediaBloc extends Bloc<MediaEvent, MediaState> {
             mediaType: event.getFilteredMediaParams.mediaType,
             getFilteredMediaParams:
                 event.getFilteredMediaParams.copyWith(page: 1)));
+        print(event.getFilteredMediaParams.toString());
       }
     });
   }

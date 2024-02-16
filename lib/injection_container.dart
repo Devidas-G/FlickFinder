@@ -14,6 +14,7 @@ import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'core/platform/network_info.dart';
+import 'features/filter/domain/usecases/getfilteroptions.dart';
 import 'features/media/domain/repositories/media_repo.dart';
 
 final GetIt sl = GetIt.instance;
@@ -47,7 +48,7 @@ Future<void> init() async {
 
   //! Features - Filter
   // Bloc
-  sl.registerFactory(() => FilterBloc());
+  sl.registerFactory(() => FilterBloc(getFilterOptions: sl()));
 
   // Use cases
   sl.registerLazySingleton(() => GetFilterOptions(sl()));

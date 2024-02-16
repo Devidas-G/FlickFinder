@@ -1,6 +1,7 @@
 import 'package:flickfinder/core/usecase/usecase.dart';
 import 'package:flickfinder/core/utils/enum.dart';
 import 'package:flickfinder/core/utils/typedef.dart';
+import 'package:flickfinder/features/filter/domain/entities/genreentity.dart';
 import 'package:flickfinder/features/media/domain/entities/media_entity.dart';
 import 'package:flickfinder/features/media/domain/repositories/media_repo.dart';
 
@@ -19,7 +20,7 @@ class GetFilteredMedia
 class GetFilteredMediaParams {
   final int? page;
   final MediaType? mediaType;
-  final int? genre;
+  final List<GenreEntity>? genre;
   final String? primaryReleaseDateGTE;
   final String? primaryReleaseDateLTE;
   final double? voteAverageGTE;
@@ -47,7 +48,7 @@ class GetFilteredMediaParams {
   GetFilteredMediaParams copyWith({
     int? page,
     MediaType? mediaType,
-    int? genre,
+    List<GenreEntity>? genre,
     String? primaryReleaseDateGTE,
     String? primaryReleaseDateLTE,
     double? voteAverageGTE,
@@ -73,6 +74,65 @@ class GetFilteredMediaParams {
       castId: castId ?? this.castId,
       region: region ?? this.region,
       year: year ?? this.year,
+    );
+  }
+
+  @override
+  String toString() {
+    return '''FilterParams { 
+      page: $page,
+      mediaType: $mediaType,
+      genre: $genre,
+      primaryReleaseDateGTE: $primaryReleaseDateGTE,
+      primaryReleaseDateLTE: $primaryReleaseDateLTE,
+      voteAverageGTE: $voteAverageGTE,
+      language: $language,
+      certificationCountry: $certificationCountry,
+      certification: $certification,
+      castId: $castId,
+      region: $region,
+      year: $year,
+      }''';
+  }
+
+  // Method to convert the class to a map
+  Map<String, dynamic> toMap({List<String>? excludeKeys}) {
+    Map<String, dynamic> map = {
+      'page': page,
+      'mediaType': mediaType,
+      'genre': genre,
+      'primaryReleaseDateGTE': primaryReleaseDateGTE,
+      'primaryReleaseDateLTE': primaryReleaseDateLTE,
+      'voteAverageGTE': voteAverageGTE,
+      'language': language,
+      'certificationCountry': certificationCountry,
+      'certification': certification,
+      'castId': castId,
+      'region': region,
+      'year': year,
+    };
+
+    // Remove keys specified in excludeKeys
+    excludeKeys?.forEach((key) => map.remove(key));
+
+    return map;
+  }
+
+  // Factory method to create an instance from a map
+  factory GetFilteredMediaParams.fromMap(Map<String, dynamic> map) {
+    return GetFilteredMediaParams(
+      page: map['page'],
+      mediaType: map['mediaType'],
+      genre: map['genre'],
+      primaryReleaseDateGTE: map['primaryReleaseDateGTE'],
+      primaryReleaseDateLTE: map['primaryReleaseDateLTE'],
+      voteAverageGTE: map['voteAverageGTE'],
+      language: map['language'],
+      certificationCountry: map['certificationCountry'],
+      certification: map['certification'],
+      castId: map['castId'],
+      region: map['region'],
+      year: map['year'],
     );
   }
 }

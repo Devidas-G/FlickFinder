@@ -8,9 +8,26 @@ sealed class FilterEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class GetFilterOptions extends FilterEvent {
-  FilterParameters filterParameters;
-  GetFilterOptions(this.filterParameters);
+class GetFilterOption extends FilterEvent {
+  final GetFilteredMediaParams getFilteredMediaParams;
+  final FilterBloc filterBloc;
+  const GetFilterOption(this.getFilteredMediaParams, this.filterBloc);
   @override
-  List<Object> get props => [filterParameters];
+  List<Object> get props => [getFilteredMediaParams, filterBloc];
+}
+
+class UpdateFilterparmas extends FilterEvent {
+  final GetFilteredMediaParams newFilterParams;
+
+  const UpdateFilterparmas({required this.newFilterParams});
+  @override
+  List<Object> get props => [newFilterParams];
+}
+
+class UpdateMediaType extends FilterEvent {
+  final MediaType mediaType;
+
+  const UpdateMediaType({required this.mediaType});
+  @override
+  List<Object> get props => [mediaType];
 }
