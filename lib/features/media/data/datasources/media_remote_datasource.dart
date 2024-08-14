@@ -98,22 +98,39 @@ class MediaRemoteDatasourceImpl implements MediaRemoteDatasource {
   }
 
   Future<List<TvShowModel>> getTvShowfromUrl(String url) async {
-    print(url);
-    List<TvShowModel> tvShows = [];
-    final response = await client.get(
-      Uri.parse(url),
-      headers: ApiConfig.getHeaders(),
-    );
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> _responseData = json.decode(response.body);
-      final List result = _responseData["results"];
-      result.forEach((movie) {
-        tvShows.add(TvShowModel.fromJson(movie));
-      });
-      return tvShows;
-    } else {
+    try {
+      // Log the URL for debugging
+      debugPrint('Fetching movies from: $url');
+
+      // Perform the HTTP GET request
+      final response = await client.get(
+        Uri.parse(url),
+        headers: ApiConfig.getHeaders(),
+      );
+
+      // Check if the request was successful
+      if (response.statusCode == 200) {
+        // Parse the JSON response
+        final Map<String, dynamic> responseData = json.decode(response.body);
+
+        // Extract the list of movie results
+        final List<dynamic> results = responseData["results"] ?? [];
+
+        // Map each result to a MovieModel instance and return the list
+        return results.map((tvShow) => TvShowModel.fromJson(tvShow)).toList();
+      } else {
+        // Handle HTTP error responses
+        throw ApiException(
+          message: "Failed to load movies: ${response.reasonPhrase}",
+          statuscode: response.statusCode,
+        );
+      }
+    } catch (e) {
+      // Catch any other errors that may occur
       throw ApiException(
-          message: "${response.reasonPhrase}", statuscode: response.statusCode);
+        message: "An error occurred while fetching movies: $e",
+        statuscode: 500,
+      );
     }
   }
 

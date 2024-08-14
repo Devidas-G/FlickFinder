@@ -18,12 +18,14 @@ class MediaPage extends StatefulWidget {
 
 class _MediaPageState extends State<MediaPage> {
   final ScrollController _scrollController = ScrollController();
-
   final MediaBloc mediaBloc = sl<MediaBloc>();
-
+  MediaType selectedMediaType = MediaType.values.first;
+  late String initialCategory;
   @override
   void initState() {
     super.initState();
+    List<String> _initCats = _getCategories(selectedMediaType);
+    initialCategory = _initCats.first;
     _scrollController.addListener(_onScroll);
   }
 
@@ -50,52 +52,96 @@ class _MediaPageState extends State<MediaPage> {
     super.dispose();
   }
 
+  List<String> _getCategories(MediaType mediaType) {
+    switch (mediaType) {
+      case MediaType.Movies:
+        return MoviesList.values.map((cat) => cat.name).toList();
+      case MediaType.TvShows:
+        return TvList.values.map((cat) => cat.name).toList();
+      default:
+        return [];
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: CategoryDropdown(categories: [], onChanged: (String? value) {}),
+        title: CategoryDropdown(
+          categories: _getCategories(selectedMediaType),
+          onChanged: (String? value) {
+            setState(() {
+              initialCategory = value!;
+            });
+            mediaBloc.add(GetMediaWithParamsEvent(
+                GetMediaParams(mediaType: selectedMediaType, category: value)));
+          },
+          selectedCategory: initialCategory,
+        ),
         bottom: PreferredSize(
             preferredSize: const Size.fromHeight(20),
             child: MediaTypeList(
-                mediaType: MediaType.values
-                    .map((type) => type.toString().split('.').last)
-                    .toList(),
-                onChanged: (String? value) {})),
+              mediaType: MediaType.values,
+              onChanged: (MediaType value) {
+                List<String> _initCats = _getCategories(value);
+                setState(() {
+                  selectedMediaType = value;
+                  initialCategory = _initCats.first;
+                });
+                mediaBloc.add(GetMediaWithParamsEvent(GetMediaParams(
+                    mediaType: selectedMediaType, category: _initCats.first)));
+              },
+              selectedMediaType: selectedMediaType,
+            )),
       ),
       body: BlocProvider(
         create: (context) => mediaBloc
-          ..add(const GetMediaWithParamsEvent(GetMediaParams(
-              mediaType: MediaType.Movies, category: 'now_playing'))),
+          ..add(GetMediaWithParamsEvent(GetMediaParams(
+              mediaType: selectedMediaType, category: initialCategory))),
         child: BlocBuilder<MediaBloc, MediaState>(
           builder: (BuildContext context, MediaState state) {
-            switch (state.status) {
-              case BS.initial:
-                return const LoadingWidget(message: "initializing...");
-              case BS.error:
-                return MessageDisplay(
-                    message: state.message, code: state.statusCode);
-              case BS.loaded || BS.loadingMore:
-                return Column(
-                  children: [
-                    const SizedBox(
-                      height: 5,
-                    ),
-                    MediaGrid(
-                      media: state.media,
-                      onTap: (MediaEntity value) {},
-                      scrollController: _scrollController,
-                    ),
-                    if (state.status == BS.loadingMore)
-                      const LoadingWidget(message: "Loading...")
-                  ],
-                );
-              default:
-                return const MessageDisplay(
-                  message: 'Something went wrong',
-                  code: 0,
-                );
-            }
+            return ListView(
+              physics: const BouncingScrollPhysics(),
+              controller: _scrollController,
+              children: [
+                if (state.media.isNotEmpty)
+                  MediaGrid(
+                    media: state.media,
+                    onTap: (MediaEntity value) {},
+                  ),
+                if (state.status != BS.loaded)
+                  (() {
+                    switch (state.status) {
+                      case BS.initial:
+                        return const LoadingWidget(message: "initializing...");
+                      case BS.error:
+                        return MessageDisplay(
+                          message: state.message,
+                          code: state.statusCode,
+                          onRetry: () {
+                            mediaBloc.add(GetMediaWithParamsEvent(
+                                state.getFilteredMediaParams.copyWith(
+                                    mediaType: selectedMediaType,
+                                    category: initialCategory)));
+                          },
+                        );
+                      case BS.loadingMore:
+                        return const LoadingWidget(message: "Loading...");
+                      default:
+                        return MessageDisplay(
+                          message: 'Something went wrong',
+                          code: 0,
+                          onRetry: () {
+                            mediaBloc.add(GetMediaWithParamsEvent(
+                                state.getFilteredMediaParams.copyWith(
+                                    mediaType: selectedMediaType,
+                                    category: initialCategory)));
+                          },
+                        );
+                    }
+                  }()),
+              ],
+            );
           },
         ),
       ),
