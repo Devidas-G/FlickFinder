@@ -1,9 +1,7 @@
-import 'package:flickfinder/features/explore/data/datasources/media_local_datasource.dart';
-import 'package:flickfinder/features/explore/data/datasources/media_remote_datasource.dart';
-import 'package:flickfinder/features/explore/data/repositories/media_repo_impl.dart';
-import 'package:flickfinder/features/explore/domain/usecases/getfilteredmovies.dart';
-import 'package:flickfinder/features/explore/domain/usecases/getmedia.dart';
-import 'package:flickfinder/features/explore/presentation/bloc/media_bloc.dart';
+import 'package:flickfinder/features/media/data/datasources/media_remote_datasource.dart';
+import 'package:flickfinder/features/media/data/repositories/media_repo_impl.dart';
+import 'package:flickfinder/features/media/domain/usecases/getfilteredmedia.dart';
+import 'package:flickfinder/features/media/presentation/bloc/media_bloc.dart';
 import 'package:flickfinder/features/filter/data/datasources/filter_local_datasource.dart';
 import 'package:flickfinder/features/filter/data/datasources/filter_remote_datasource.dart';
 import 'package:flickfinder/features/filter/data/repositories/filter_repo_impl.dart';
@@ -14,7 +12,8 @@ import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'core/platform/network_info.dart';
-import 'features/explore/domain/repositories/media_repo.dart';
+import 'features/filter/domain/usecases/getfilteroptions.dart';
+import 'features/media/domain/repositories/media_repo.dart';
 
 final GetIt sl = GetIt.instance;
 Future<void> init() async {
@@ -29,25 +28,22 @@ Future<void> init() async {
 
   //! Features - Media
   // Bloc
-  sl.registerFactory(() => MediaBloc(getMedia: sl(), getFilteredMovies: sl()));
+  sl.registerFactory(() => MediaBloc(getMedia: sl()));
 
   // Use cases
   sl.registerLazySingleton(() => GetMedia(sl()));
-  sl.registerLazySingleton(() => GetFilteredMovies(sl()));
 
   // Repository
-  sl.registerLazySingleton<MediaRepo>(() => MediaRepoImpl(
-      localDatasource: sl(), remoteDatasource: sl(), networkInfo: sl()));
+  sl.registerLazySingleton<MediaRepo>(
+      () => MediaRepoImpl(remoteDatasource: sl(), networkInfo: sl()));
 
   // Data sources
   sl.registerLazySingleton<MediaRemoteDatasource>(
       () => MediaRemoteDatasourceImpl(client: sl()));
-  sl.registerLazySingleton<MediaLocalDatasource>(
-      () => MediaLocalDatasourceImpl(sharedPreferences: sl()));
 
   //! Features - Filter
   // Bloc
-  sl.registerFactory(() => FilterBloc());
+  sl.registerFactory(() => FilterBloc(getFilterOptions: sl()));
 
   // Use cases
   sl.registerLazySingleton(() => GetFilterOptions(sl()));

@@ -1,5 +1,7 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flickfinder/features/filter/presentation/bloc/filter_bloc.dart';
+import 'package:flickfinder/features/filter/presentation/widgets/filter_list.dart';
+import 'package:flickfinder/features/media/domain/usecases/getfilteredmedia.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -9,258 +11,136 @@ import '../widgets/loading_widget.dart';
 import '../widgets/message_display.dart';
 
 class FilterOptions extends StatefulWidget {
-  final Function(String) onApply;
-  final Function(MediaType?) onMediaTypeChange;
-
-  const FilterOptions(
-      {super.key, required this.onApply, required this.onMediaTypeChange});
+  final Function(GetMediaParams) onApply;
+  final Function() onClear;
+  final Function(GetMediaParams) onMediaTypeChange;
+  const FilterOptions({
+    super.key,
+    required this.onApply,
+    required this.onMediaTypeChange,
+    required this.onClear,
+  });
   @override
   createState() => _FilterOptions();
 }
 
 class _FilterOptions extends State<FilterOptions> {
-  MediaType selectedDropOption = MediaType.values.first;
-  FilterParameters _selectedParameters = FilterParameters.values.first;
+  MediaType selectedOption = MediaType.values.first;
+  Enum selectedDropOption = MoviesList.values.first;
+  List<Enum> dropdownValues = MoviesList.values;
   late FilterBloc filterBloc;
+  GetMediaParams getFilteredMediaParams =
+      GetMediaParams(mediaType: MediaType.Movies, category: '');
   @override
   void initState() {
     super.initState();
     filterBloc = sl<FilterBloc>();
   }
 
-  void _triggerEvent(FilterParameters filterParameters) {
-    filterBloc.add(GetFilterOptions(filterParameters));
-  }
-
-  void showFilterBottomSheet(
-      BuildContext builderContext, Function(String) onApply) {
-    showModalBottomSheet<void>(
-      context: builderContext,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topRight: Radius.circular(20),
-          topLeft: Radius.circular(20),
-        ),
-      ),
-      builder: (_) {
-        return _buildFilterBottomSheet(builderContext, onApply);
-      },
-    );
-  }
-
-  Widget _buildFilterBottomSheet(
-      BuildContext builderContext, Function(String) onApply) {
-    return StatefulBuilder(
-      builder: (_, void Function(void Function()) setState) {
-        return SizedBox(
-          height: MediaQuery.of(builderContext).size.height * 0.7,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _filterHeader(builderContext, setState),
-              Expanded(
-                child: _filterSides(builderContext, setState),
-              ),
-              _buildFilterActions(builderContext, onApply),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _filterHeader(
-      BuildContext context, void Function(void Function()) setState) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            'Filter',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.close),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _filterSides(
-      BuildContext builderContext, void Function(void Function()) setState) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Expanded(
-          flex: 3,
-          child: _buildFilterParametersList(builderContext, setState),
-        ),
-        Expanded(
-          flex: 7,
-          child: buildBody(builderContext, filterBloc),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFilterParametersList(
-      BuildContext context, void Function(void Function()) setState) {
-    return ListView(
-      children: FilterParameters.values.map((parameter) {
-        return Card(
-          elevation: 0,
-          margin: EdgeInsets.zero,
-          child: ListTile(
-            selected: _selectedParameters == parameter,
-            selectedTileColor: Colors.grey,
-            onTap: () {
-              setState(() {
-                _selectedParameters = parameter;
-              });
-              _triggerEvent(parameter);
-            },
-            title: AutoSizeText(
-              parameter.name,
-              style: TextStyle(
-                fontSize: 16.0,
-                fontWeight: FontWeight.bold,
-              ),
-              maxLines: 1,
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildFilterActions(BuildContext context, Function(String) onApply) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          OutlinedButton(
-            onPressed: () {},
-            style: OutlinedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20.0),
-              ),
-            ),
-            child: Text("Clear All"),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              onApply("with_genres=28");
-            },
-            style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20.0),
-              ),
-            ),
-            child: Text("Apply"),
-          ),
-        ],
-      ),
-    );
+  void setDropdownValues(MediaType mediaType) {
+    switch (mediaType) {
+      case MediaType.Movies:
+        setState(() {
+          dropdownValues = MoviesList.values;
+          selectedDropOption = MoviesList.values.first;
+        });
+      case MediaType.TvShows:
+        setState(() {
+          dropdownValues = TvList.values;
+          selectedDropOption = TvList.values.first;
+        });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 12.0, right: 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      padding: const EdgeInsets.only(left: 12.0, right: 12, bottom: 5),
+      child: Column(
         children: [
-          DropdownButton<MediaType>(
-            value: selectedDropOption,
-            onChanged: (MediaType? newValue) {
-              setState(() {
-                selectedDropOption = newValue!;
-              });
-              widget.onMediaTypeChange(
-                  newValue); // Assuming .value gives you the corresponding string
-            },
-            items: MediaType.values.map((MediaType item) {
-              return DropdownMenuItem(
-                value: item,
-                child: Text(item.name),
-              );
-            }).toList(),
-          ),
           Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              IconButton(onPressed: () {}, icon: Icon(Icons.sort)),
-              BlocProvider(
-                create: (_) => filterBloc
-                  ..add(GetFilterOptions(filterBloc.state.filterParameters)),
-                child: Builder(builder: (context) {
-                  return IconButton(
-                      onPressed: () {
-                        showFilterBottomSheet(context, widget.onApply);
-                      },
-                      icon: Icon(Icons.filter_alt));
-                }),
+              DropdownButton<Enum>(
+                value: selectedDropOption,
+                onChanged: (newValue) {
+                  setState(() {
+                    selectedDropOption = newValue!;
+                  });
+                  widget.onApply(filterBloc.state.tempFilterParams
+                      .copyWith(category: newValue.toString()));
+                },
+                items: dropdownValues.map((Enum? item) {
+                  return DropdownMenuItem<Enum>(
+                    value: item,
+                    child: Text(item.toString().split('.').last),
+                  );
+                }).toList(),
               ),
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.end,
+              //   children: [
+              //     IconButton(onPressed: () {}, icon: Icon(Icons.sort)),
+              //     BlocProvider(
+              //       create: (_) => filterBloc..add(GetFilterOption(filterBloc)),
+              //       child: FilterList(
+              //         onApply: () {
+              //           filterBloc.add(GetFilterOption(filterBloc));
+              //           widget.onApply(filterBloc.state.tempFilterParams);
+              //         },
+              //         onClear: () {
+              //           widget.onClear();
+              //           filterBloc.add(UpdateFilterparmas(
+              //               newFilterParams: getFilteredMediaParams));
+              //           filterBloc.add(GetFilterOption(filterBloc));
+              //         },
+              //       ),
+              //     ),
+              //   ],
+              // ),
             ],
           ),
+          SizedBox(
+            height: 30,
+            child: ListView.builder(
+              itemCount: MediaType.values.length,
+              physics: BouncingScrollPhysics(),
+              scrollDirection: Axis.horizontal,
+              itemBuilder: (BuildContext context, int index) {
+                MediaType mediaType = MediaType.values[index];
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: TextButton(
+                    onPressed: () {
+                      setState(() {
+                        selectedOption = mediaType;
+                      });
+                      setDropdownValues(mediaType);
+                      widget.onMediaTypeChange(GetMediaParams(
+                          mediaType: mediaType,
+                          category: selectedDropOption.toString()));
+                      filterBloc.add(UpdateMediaType(mediaType: mediaType));
+                      filterBloc.add(UpdateFilterparmas(
+                          newFilterParams: getFilteredMediaParams));
+                      filterBloc.add(GetFilterOption(filterBloc));
+                    },
+                    child: Text(mediaType.name),
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.all(5),
+                      backgroundColor: selectedOption == mediaType
+                          ? Theme.of(context).primaryColor
+                          : Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
+                          side: BorderSide(color: Colors.grey.shade800)),
+                    ),
+                  ),
+                );
+              },
+            ),
+          )
         ],
       ),
     );
-  }
-}
-
-BlocProvider<FilterBloc> buildBody(
-    BuildContext builderContext, FilterBloc filterBloc) {
-  return BlocProvider.value(
-    value: builderContext.read<FilterBloc>(),
-    child: BlocBuilder<FilterBloc, FilterState>(
-      builder: (BuildContext context, FilterState state) {
-        switch (state.status) {
-          case FilterStatus.initial:
-            return const LoadingWidget(
-              message: "Initializing",
-            );
-          case FilterStatus.loading:
-            return const LoadingWidget(
-              message: "Loading",
-            );
-          case FilterStatus.loaded:
-            return buildFilterWidget(state);
-          case FilterStatus.error:
-            return MessageDisplay(
-              message: state.message,
-              code: state.statusCode,
-            );
-          default:
-            return const MessageDisplay(
-              message: "something went wrong",
-              code: 0,
-            );
-        }
-      },
-    ),
-  );
-}
-
-Widget buildFilterWidget(FilterState state) {
-  switch (state.filterParameters) {
-    case FilterParameters.Genres:
-      return Container(
-        color: Colors.red,
-      );
-    case FilterParameters.ReleaseDate:
-      return Container(
-        child: Text("kksd"),
-      );
-    default:
-      return const MessageDisplay(
-        message: "Please select a option",
-        code: 0,
-      );
   }
 }

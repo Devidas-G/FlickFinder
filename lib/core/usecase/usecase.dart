@@ -10,3 +10,7 @@ class NoParams extends Equatable {
   @override
   List<Object> get props => [];
 }
+
+abstract class UseCaseWithBloc<Type, FilterBloc> {
+  ResultFuture<Type> call(FilterBloc filterBloc);
+}
