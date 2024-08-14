@@ -6,32 +6,30 @@ import 'widgets.dart';
 class MediaGrid extends StatelessWidget {
   final List<MediaEntity> media;
   final ValueChanged<MediaEntity> onTap;
-  final ScrollController scrollController;
-  const MediaGrid(
-      {super.key,
-      required this.media,
-      required this.onTap,
-      required this.scrollController});
+  const MediaGrid({
+    super.key,
+    required this.media,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-        child: GridView.builder(
-            shrinkWrap: true,
-            controller: scrollController,
-            itemCount: media.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3, // Number of columns in the grid
-              crossAxisSpacing: 1, // Spacing between columns
-              mainAxisSpacing: 1, // Spacing between rows
-              childAspectRatio: 0.6, // Aspect ratio for each card
-            ),
-            itemBuilder: (context, index) {
-              MediaEntity mediaEntity = media[index];
-              return MediaCard(
-                media: mediaEntity,
-              );
-            }));
+    return GridView.builder(
+        physics: const NeverScrollableScrollPhysics(),
+        shrinkWrap: true,
+        itemCount: media.length,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3, // Number of columns in the grid
+          crossAxisSpacing: 1, // Spacing between columns
+          mainAxisSpacing: 1, // Spacing between rows
+          childAspectRatio: 0.6, // Aspect ratio for each card
+        ),
+        itemBuilder: (context, index) {
+          MediaEntity mediaEntity = media[index];
+          return MediaCard(
+            media: mediaEntity,
+          );
+        });
   }
 }
 
