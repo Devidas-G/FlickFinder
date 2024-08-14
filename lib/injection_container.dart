@@ -1,8 +1,6 @@
-import 'package:flickfinder/features/media/data/datasources/media_local_datasource.dart';
 import 'package:flickfinder/features/media/data/datasources/media_remote_datasource.dart';
 import 'package:flickfinder/features/media/data/repositories/media_repo_impl.dart';
 import 'package:flickfinder/features/media/domain/usecases/getfilteredmedia.dart';
-import 'package:flickfinder/features/media/domain/usecases/getmedia.dart';
 import 'package:flickfinder/features/media/presentation/bloc/media_bloc.dart';
 import 'package:flickfinder/features/filter/data/datasources/filter_local_datasource.dart';
 import 'package:flickfinder/features/filter/data/datasources/filter_remote_datasource.dart';
@@ -30,21 +28,18 @@ Future<void> init() async {
 
   //! Features - Media
   // Bloc
-  sl.registerFactory(() => MediaBloc(getMedia: sl(), getFilteredMedia: sl()));
+  sl.registerFactory(() => MediaBloc(getMedia: sl()));
 
   // Use cases
   sl.registerLazySingleton(() => GetMedia(sl()));
-  sl.registerLazySingleton(() => GetFilteredMedia(sl()));
 
   // Repository
-  sl.registerLazySingleton<MediaRepo>(() => MediaRepoImpl(
-      localDatasource: sl(), remoteDatasource: sl(), networkInfo: sl()));
+  sl.registerLazySingleton<MediaRepo>(
+      () => MediaRepoImpl(remoteDatasource: sl(), networkInfo: sl()));
 
   // Data sources
   sl.registerLazySingleton<MediaRemoteDatasource>(
       () => MediaRemoteDatasourceImpl(client: sl()));
-  sl.registerLazySingleton<MediaLocalDatasource>(
-      () => MediaLocalDatasourceImpl(sharedPreferences: sl()));
 
   //! Features - Filter
   // Bloc

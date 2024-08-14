@@ -31,7 +31,7 @@ class _SelectionGridState extends State<SelectionGrid> {
   }
 
   void toggleSelection(GenreEntity item) {
-    final GetFilteredMediaParams newFilteredMediaParams =
+    final GetMediaParams newFilteredMediaParams =
         widget.filterBloc.state.newFilterParams;
     if (_selectedItems.contains(item)) {
       _selectedItems.remove(item);

@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flickfinder/core/common/api_config.dart';
+import 'package:flickfinder/core/config/api_config.dart';
 import 'package:flickfinder/core/utils/enum.dart';
 import 'package:flickfinder/features/filter/data/models/filter_model.dart';
 import 'package:flickfinder/features/filter/data/models/genre_model.dart';

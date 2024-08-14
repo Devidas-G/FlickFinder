@@ -18,7 +18,7 @@ class MessageDisplay extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(message),
-          SizedBox(
+          const SizedBox(
             height: 20,
           ),
           Text(code.toString()),

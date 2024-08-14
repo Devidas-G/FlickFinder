@@ -8,26 +8,38 @@ final class FilterState extends Equatable {
     this.statusCode = 0,
     this.message = "",
     this.filterList = const [],
-    this.newFilterParams = const GetFilteredMediaParams(),
+    this.newFilterParams =
+        const GetMediaParams(mediaType: MediaType.Movies, category: ''),
+    this.tempFilterParams =
+        const GetMediaParams(mediaType: MediaType.Movies, category: ''),
     this.mediaType = MediaType.Movies,
   });
   final FilterStatus status;
   final int statusCode;
   final String message;
   final List<FilterEntity> filterList;
-  final GetFilteredMediaParams newFilterParams;
+  final GetMediaParams newFilterParams;
+  final GetMediaParams tempFilterParams;
   final MediaType mediaType;
 
   @override
-  List<Object> get props =>
-      [status, statusCode, message, filterList, newFilterParams, mediaType];
+  List<Object> get props => [
+        status,
+        statusCode,
+        message,
+        filterList,
+        newFilterParams,
+        tempFilterParams,
+        mediaType
+      ];
 
   FilterState copyWith({
     FilterStatus? status,
     int? statusCode,
     String? message,
     List<FilterEntity>? filterList,
-    GetFilteredMediaParams? newFilterParams,
+    GetMediaParams? newFilterParams,
+    GetMediaParams? tempFilterParams,
     MediaType? mediaType,
   }) {
     return FilterState(
@@ -36,12 +48,13 @@ final class FilterState extends Equatable {
       message: message ?? this.message,
       filterList: filterList ?? this.filterList,
       newFilterParams: newFilterParams ?? this.newFilterParams,
+      tempFilterParams: tempFilterParams ?? this.tempFilterParams,
       mediaType: mediaType ?? this.mediaType,
     );
   }
 
   @override
   String toString() {
-    return 'FilterState { status: $status, statusCode: $statusCode, message: $message, filterList: $filterList, newFilterParams: $newFilterParams, MediaType: $mediaType,}';
+    return 'FilterState { status: $status, statusCode: $statusCode, message: $message, filterList: $filterList, newFilterParams: $newFilterParams,tempFilterParams: $tempFilterParams, MediaType: $mediaType,}';
   }
 }

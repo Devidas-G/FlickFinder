@@ -4,7 +4,5 @@ import 'package:flickfinder/features/media/domain/entities/media_entity.dart';
 import 'package:flickfinder/features/media/domain/usecases/getfilteredmedia.dart';
 
 abstract class MediaRepo {
-  ResultFuture<List<MediaEntity>> getMedia(int page, MediaType mediaType);
-  ResultFuture<List<MediaEntity>> getFilteredMedia(
-      GetFilteredMediaParams getFilteredMediaParams);
+  ResultFuture<List<MediaEntity>> getMedia(GetMediaParams getMediaParams);
 }

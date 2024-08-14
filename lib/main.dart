@@ -1,7 +1,7 @@
 import 'package:flickfinder/bootstrap.dart';
-import 'package:flickfinder/core/common/config_service.dart';
-import 'package:flickfinder/core/common/homepagestateprovider.dart';
-import 'package:flickfinder/pages/homepage.dart';
+import 'package:flickfinder/core/config/config_service.dart';
+import 'package:flickfinder/providers/homepagestateprovider.dart';
+import 'package:flickfinder/views/dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flickfinder/injection_container.dart' as di;
 import 'package:provider/provider.dart';
@@ -10,7 +10,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await ConfigService.initialize();
   await di.init();
-  bootstrap(() => const MyApp());
+  // bootstrap(() => const MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {

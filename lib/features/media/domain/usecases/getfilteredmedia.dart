@@ -5,21 +5,21 @@ import 'package:flickfinder/features/filter/domain/entities/genreentity.dart';
 import 'package:flickfinder/features/media/domain/entities/media_entity.dart';
 import 'package:flickfinder/features/media/domain/repositories/media_repo.dart';
 
-class GetFilteredMedia
-    implements UseCase<List<MediaEntity>, GetFilteredMediaParams> {
+class GetMedia implements UseCase<List<MediaEntity>, GetMediaParams> {
   final MediaRepo repository;
 
-  GetFilteredMedia(this.repository);
+  GetMedia(this.repository);
 
   @override
-  ResultFuture<List<MediaEntity>> call(GetFilteredMediaParams params) async {
-    return await repository.getFilteredMedia(params);
+  ResultFuture<List<MediaEntity>> call(GetMediaParams params) async {
+    return await repository.getMedia(params);
   }
 }
 
-class GetFilteredMediaParams {
+class GetMediaParams {
   final int? page;
-  final MediaType? mediaType;
+  final MediaType mediaType;
+  final String? category;
   final List<GenreEntity>? genre;
   final String? primaryReleaseDateGTE;
   final String? primaryReleaseDateLTE;
@@ -30,9 +30,10 @@ class GetFilteredMediaParams {
   final int? castId;
   final String? region;
   final int? year;
-  const GetFilteredMediaParams({
+  const GetMediaParams({
     this.page = 0,
-    this.mediaType = MediaType.Movies,
+    required this.mediaType,
+    required this.category,
     this.genre,
     this.primaryReleaseDateGTE,
     this.primaryReleaseDateLTE,
@@ -45,9 +46,10 @@ class GetFilteredMediaParams {
     this.year,
   });
 
-  GetFilteredMediaParams copyWith({
+  GetMediaParams copyWith({
     int? page,
     MediaType? mediaType,
+    String? category,
     List<GenreEntity>? genre,
     String? primaryReleaseDateGTE,
     String? primaryReleaseDateLTE,
@@ -59,9 +61,10 @@ class GetFilteredMediaParams {
     String? region,
     int? year,
   }) {
-    return GetFilteredMediaParams(
+    return GetMediaParams(
       page: page ?? this.page,
       mediaType: mediaType ?? this.mediaType,
+      category: category ?? this.category,
       genre: genre ?? this.genre,
       primaryReleaseDateGTE:
           primaryReleaseDateGTE ?? this.primaryReleaseDateGTE,
@@ -82,6 +85,7 @@ class GetFilteredMediaParams {
     return '''FilterParams { 
       page: $page,
       mediaType: $mediaType,
+      category: $category,
       genre: $genre,
       primaryReleaseDateGTE: $primaryReleaseDateGTE,
       primaryReleaseDateLTE: $primaryReleaseDateLTE,
@@ -95,44 +99,18 @@ class GetFilteredMediaParams {
       }''';
   }
 
-  // Method to convert the class to a map
-  Map<String, dynamic> toMap({List<String>? excludeKeys}) {
-    Map<String, dynamic> map = {
-      'page': page,
-      'mediaType': mediaType,
-      'genre': genre,
-      'primaryReleaseDateGTE': primaryReleaseDateGTE,
-      'primaryReleaseDateLTE': primaryReleaseDateLTE,
-      'voteAverageGTE': voteAverageGTE,
-      'language': language,
-      'certificationCountry': certificationCountry,
-      'certification': certification,
-      'castId': castId,
-      'region': region,
-      'year': year,
-    };
-
-    // Remove keys specified in excludeKeys
-    excludeKeys?.forEach((key) => map.remove(key));
-
-    return map;
-  }
-
-  // Factory method to create an instance from a map
-  factory GetFilteredMediaParams.fromMap(Map<String, dynamic> map) {
-    return GetFilteredMediaParams(
-      page: map['page'],
-      mediaType: map['mediaType'],
-      genre: map['genre'],
-      primaryReleaseDateGTE: map['primaryReleaseDateGTE'],
-      primaryReleaseDateLTE: map['primaryReleaseDateLTE'],
-      voteAverageGTE: map['voteAverageGTE'],
-      language: map['language'],
-      certificationCountry: map['certificationCountry'],
-      certification: map['certification'],
-      castId: map['castId'],
-      region: map['region'],
-      year: map['year'],
-    );
+  int getTotalNonNullCount() {
+    int totalNonNullCount = 0;
+    if (genre != null) totalNonNullCount++;
+    if (primaryReleaseDateGTE != null) totalNonNullCount++;
+    if (primaryReleaseDateLTE != null) totalNonNullCount++;
+    if (voteAverageGTE != null) totalNonNullCount++;
+    if (language != null) totalNonNullCount++;
+    if (certificationCountry != null) totalNonNullCount++;
+    if (certification != null) totalNonNullCount++;
+    if (castId != null) totalNonNullCount++;
+    if (region != null) totalNonNullCount++;
+    if (year != null) totalNonNullCount++;
+    return totalNonNullCount;
   }
 }

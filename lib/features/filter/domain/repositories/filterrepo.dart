@@ -6,6 +6,5 @@ import '../../../media/domain/usecases/getfilteredmedia.dart';
 import '../../presentation/bloc/filter_bloc.dart';
 
 abstract class FilterRepo {
-  ResultFuture<List<FilterEntity>> getFilterOptions(
-      GetFilteredMediaParams params, FilterBloc filterBloc);
+  ResultFuture<List<FilterEntity>> getFilterOptions(FilterBloc filterBloc);
 }

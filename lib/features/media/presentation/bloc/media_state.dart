@@ -1,6 +1,6 @@
 part of 'media_bloc.dart';
 
-enum MediaStatus { initial, loading, loaded, error }
+enum MediaStatus { initial, loadingMore, loaded, error }
 
 final class MediaState extends Equatable {
   const MediaState({
@@ -11,7 +11,8 @@ final class MediaState extends Equatable {
     this.message = "",
     this.currentPage = 0,
     this.mediaType = MediaType.Movies,
-    this.getFilteredMediaParams = const GetFilteredMediaParams(),
+    this.getFilteredMediaParams =
+        const GetMediaParams(mediaType: MediaType.Movies, category: ''),
   });
   final MediaStatus status;
   final List<MediaEntity> media;
@@ -20,7 +21,7 @@ final class MediaState extends Equatable {
   final int currentPage;
   final String message;
   final MediaType mediaType;
-  final GetFilteredMediaParams getFilteredMediaParams;
+  final GetMediaParams getFilteredMediaParams;
 
   @override
   List<Object> get props => [
@@ -42,7 +43,7 @@ final class MediaState extends Equatable {
     String? message,
     int? currentPage,
     MediaType? mediaType,
-    GetFilteredMediaParams? getFilteredMediaParams,
+    GetMediaParams? getFilteredMediaParams,
   }) {
     return MediaState(
         status: status ?? this.status,

@@ -27,7 +27,7 @@ class FilterRepoImpl implements FilterRepo {
       required this.networkInfo});
   @override
   ResultFuture<List<FilterEntity>> getFilterOptions(
-      GetFilteredMediaParams params, FilterBloc filterBloc) async {
+      FilterBloc filterBloc) async {
     List<GenreEntity> genreEntitys = [];
     if (await networkInfo.isConnected) {
       try {

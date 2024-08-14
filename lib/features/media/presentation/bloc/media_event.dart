@@ -8,7 +8,7 @@ sealed class MediaEvent extends Equatable {
 }
 
 class GetMediaWithParamsEvent extends MediaEvent {
-  final GetFilteredMediaParams getFilteredMediaParams;
+  final GetMediaParams getFilteredMediaParams;
   const GetMediaWithParamsEvent(this.getFilteredMediaParams);
 
   @override

@@ -52,11 +52,23 @@ class _FilterListState extends State<FilterList> {
   @override
   Widget build(BuildContext context) {
     return Builder(builder: (context) {
-      return IconButton(
-          onPressed: () {
-            showFilterBottomSheet(context, widget.onClear, widget.onApply);
+      return BlocProvider.value(
+        value: context.read<FilterBloc>(),
+        child: BlocBuilder<FilterBloc, FilterState>(
+          builder: (context, state) {
+            return Badge(
+              isLabelVisible: state.newFilterParams.getTotalNonNullCount() != 0,
+              label: Text('${state.newFilterParams.getTotalNonNullCount()}'),
+              child: IconButton(
+                  onPressed: () {
+                    showFilterBottomSheet(
+                        context, widget.onClear, widget.onApply);
+                  },
+                  icon: Icon(Icons.filter_alt)),
+            );
           },
-          icon: Icon(Icons.filter_alt));
+        ),
+      );
     });
   }
 }

@@ -11,9 +11,9 @@ import '../widgets/loading_widget.dart';
 import '../widgets/message_display.dart';
 
 class FilterOptions extends StatefulWidget {
-  final Function(GetFilteredMediaParams) onApply;
+  final Function(GetMediaParams) onApply;
   final Function() onClear;
-  final Function(MediaType?) onMediaTypeChange;
+  final Function(GetMediaParams) onMediaTypeChange;
   const FilterOptions({
     super.key,
     required this.onApply,
@@ -25,59 +25,120 @@ class FilterOptions extends StatefulWidget {
 }
 
 class _FilterOptions extends State<FilterOptions> {
-  MediaType selectedDropOption = MediaType.values.first;
+  MediaType selectedOption = MediaType.values.first;
+  Enum selectedDropOption = MoviesList.values.first;
+  List<Enum> dropdownValues = MoviesList.values;
   late FilterBloc filterBloc;
-  GetFilteredMediaParams getFilteredMediaParams = GetFilteredMediaParams();
+  GetMediaParams getFilteredMediaParams =
+      GetMediaParams(mediaType: MediaType.Movies, category: '');
   @override
   void initState() {
     super.initState();
     filterBloc = sl<FilterBloc>();
   }
 
+  void setDropdownValues(MediaType mediaType) {
+    switch (mediaType) {
+      case MediaType.Movies:
+        setState(() {
+          dropdownValues = MoviesList.values;
+          selectedDropOption = MoviesList.values.first;
+        });
+      case MediaType.TvShows:
+        setState(() {
+          dropdownValues = TvList.values;
+          selectedDropOption = TvList.values.first;
+        });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 12.0, right: 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      padding: const EdgeInsets.only(left: 12.0, right: 12, bottom: 5),
+      child: Column(
         children: [
-          DropdownButton<MediaType>(
-            value: selectedDropOption,
-            onChanged: (MediaType? newValue) {
-              setState(() {
-                selectedDropOption = newValue!;
-              });
-              filterBloc.add(UpdateMediaType(mediaType: newValue!));
-              filterBloc
-                  .add(GetFilterOption(getFilteredMediaParams, filterBloc));
-              widget.onMediaTypeChange(newValue);
-            },
-            items: MediaType.values.map((MediaType item) {
-              return DropdownMenuItem(
-                value: item,
-                child: Text(item.name),
-              );
-            }).toList(),
-          ),
           Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              IconButton(onPressed: () {}, icon: Icon(Icons.sort)),
-              BlocProvider(
-                create: (_) => filterBloc
-                  ..add(GetFilterOption(getFilteredMediaParams, filterBloc)),
-                child: FilterList(
-                  onApply: () =>
-                      widget.onApply(filterBloc.state.newFilterParams),
-                  onClear: () {
-                    widget.onClear();
-                    filterBloc.add(
-                        GetFilterOption(getFilteredMediaParams, filterBloc));
-                  },
-                ),
+              DropdownButton<Enum>(
+                value: selectedDropOption,
+                onChanged: (newValue) {
+                  setState(() {
+                    selectedDropOption = newValue!;
+                  });
+                  widget.onApply(filterBloc.state.tempFilterParams
+                      .copyWith(category: newValue.toString()));
+                },
+                items: dropdownValues.map((Enum? item) {
+                  return DropdownMenuItem<Enum>(
+                    value: item,
+                    child: Text(item.toString().split('.').last),
+                  );
+                }).toList(),
               ),
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.end,
+              //   children: [
+              //     IconButton(onPressed: () {}, icon: Icon(Icons.sort)),
+              //     BlocProvider(
+              //       create: (_) => filterBloc..add(GetFilterOption(filterBloc)),
+              //       child: FilterList(
+              //         onApply: () {
+              //           filterBloc.add(GetFilterOption(filterBloc));
+              //           widget.onApply(filterBloc.state.tempFilterParams);
+              //         },
+              //         onClear: () {
+              //           widget.onClear();
+              //           filterBloc.add(UpdateFilterparmas(
+              //               newFilterParams: getFilteredMediaParams));
+              //           filterBloc.add(GetFilterOption(filterBloc));
+              //         },
+              //       ),
+              //     ),
+              //   ],
+              // ),
             ],
           ),
+          SizedBox(
+            height: 30,
+            child: ListView.builder(
+              itemCount: MediaType.values.length,
+              physics: BouncingScrollPhysics(),
+              scrollDirection: Axis.horizontal,
+              itemBuilder: (BuildContext context, int index) {
+                MediaType mediaType = MediaType.values[index];
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: TextButton(
+                    onPressed: () {
+                      setState(() {
+                        selectedOption = mediaType;
+                      });
+                      setDropdownValues(mediaType);
+                      widget.onMediaTypeChange(GetMediaParams(
+                          mediaType: mediaType,
+                          category: selectedDropOption.toString()));
+                      filterBloc.add(UpdateMediaType(mediaType: mediaType));
+                      filterBloc.add(UpdateFilterparmas(
+                          newFilterParams: getFilteredMediaParams));
+                      filterBloc.add(GetFilterOption(filterBloc));
+                    },
+                    child: Text(mediaType.name),
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.all(5),
+                      backgroundColor: selectedOption == mediaType
+                          ? Theme.of(context).primaryColor
+                          : Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
+                          side: BorderSide(color: Colors.grey.shade800)),
+                    ),
+                  ),
+                );
+              },
+            ),
+          )
         ],
       ),
     );

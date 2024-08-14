@@ -38,9 +38,11 @@ class FilterBloc extends Bloc<FilterEvent, FilterState> {
     GetFilterOption event,
     Emitter<FilterState> emit,
   ) async {
-    emit(state.copyWith(status: FilterStatus.loading, message: ""));
-    final result =
-        await getFilterOptions(event.getFilteredMediaParams, event.filterBloc);
+    emit(state.copyWith(
+        status: FilterStatus.loading,
+        message: "",
+        newFilterParams: state.tempFilterParams));
+    final result = await getFilterOptions(event.filterBloc);
     result.fold(
         (failure) => emit(state.copyWith(
               status: FilterStatus.error,
@@ -64,7 +66,7 @@ class FilterBloc extends Bloc<FilterEvent, FilterState> {
     Emitter<FilterState> emit,
   ) async {
     print("update params: ${event.newFilterParams}");
-    emit(state.copyWith(newFilterParams: event.newFilterParams));
+    emit(state.copyWith(tempFilterParams: event.newFilterParams));
   }
 
   Future<void> _mapUpdateMediaTypeEventToState(

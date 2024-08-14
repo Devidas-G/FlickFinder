@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../../../core/common/api_config.dart';
+import '../../../../core/config/api_config.dart';
 import '../../domain/entities/media_entity.dart';
 
 class MediaCard extends StatelessWidget {

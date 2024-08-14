@@ -4,7 +4,6 @@ import 'package:equatable/equatable.dart';
 import 'package:flickfinder/core/utils/enum.dart';
 import 'package:flickfinder/features/media/domain/entities/media_entity.dart';
 import 'package:flickfinder/features/media/domain/usecases/getfilteredmedia.dart';
-import 'package:flickfinder/features/media/domain/usecases/getmedia.dart';
 import 'package:stream_transform/stream_transform.dart';
 
 import '../../../../core/errors/failure.dart';
@@ -24,12 +23,10 @@ EventTransformer<E> throttleDroppable<E>(Duration duration) {
 
 class MediaBloc extends Bloc<MediaEvent, MediaState> {
   final GetMedia getMedia;
-  final GetFilteredMedia getFilteredMedia;
   MediaBloc({
     required this.getMedia,
-    required this.getFilteredMedia,
   }) : super(const MediaState()) {
-    on<GetMediaWithParamsEvent>(_mapGetFilterMediaEventToState,
+    on<GetMediaWithParamsEvent>(_mapGetMediaEventToState,
         transformer: throttleDroppable(throttleDuration));
     on<GetMoreMediaEvent>(_mapGetMoreMediaEventToState,
         transformer: throttleDroppable(throttleDuration));
@@ -39,17 +36,14 @@ class MediaBloc extends Bloc<MediaEvent, MediaState> {
     GetMoreMediaEvent event,
     Emitter<MediaState> emit,
   ) async {
-    if (state.status == MediaStatus.loading) return;
+    if (state.status == MediaStatus.loadingMore) return;
     final int newPageKey = state.currentPage + 1;
-    if (state.status != MediaStatus.initial) {
-      emit(state.copyWith(
-        status: MediaStatus.loading,
-        media: state.media,
-      ));
-    }
+    emit(state.copyWith(
+      status: MediaStatus.loadingMore,
+    ));
 
-    final result = await getFilteredMedia(
-        state.getFilteredMediaParams.copyWith(page: newPageKey));
+    final result =
+        await getMedia(state.getFilteredMediaParams.copyWith(page: newPageKey));
     result.fold(
         (failure) => emit(state.copyWith(
               status: MediaStatus.error,
@@ -71,19 +65,14 @@ class MediaBloc extends Bloc<MediaEvent, MediaState> {
     });
   }
 
-  Future<void> _mapGetFilterMediaEventToState(
+  Future<void> _mapGetMediaEventToState(
       GetMediaWithParamsEvent event, Emitter<MediaState> emit) async {
-    if (state.status == MediaStatus.loading) return;
     emit(state.copyWith(
       status: MediaStatus.initial,
       media: [],
     ));
-    emit(state.copyWith(
-      status: MediaStatus.loading,
-      media: state.media,
-    ));
     final result =
-        await getFilteredMedia(event.getFilteredMediaParams.copyWith(page: 1));
+        await getMedia(event.getFilteredMediaParams.copyWith(page: 1));
     result.fold(
         (failure) => emit(state.copyWith(
               status: MediaStatus.error,
@@ -102,7 +91,6 @@ class MediaBloc extends Bloc<MediaEvent, MediaState> {
             mediaType: event.getFilteredMediaParams.mediaType,
             getFilteredMediaParams:
                 event.getFilteredMediaParams.copyWith(page: 1)));
-        print(event.getFilteredMediaParams.toString());
       }
     });
   }

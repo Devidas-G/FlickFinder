@@ -1,5 +1,5 @@
 import 'package:flickfinder/features/media/domain/usecases/getfilteredmedia.dart';
-import 'package:flickfinder/features/media/presentation/pages/media_builder.dart';
+import 'package:flickfinder/features/media/presentation/pages/media_page.dart';
 import 'package:flickfinder/features/filter/presentation/pages/filter_options.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -22,7 +22,7 @@ class _ExplorePage extends State<ExplorePage> {
     mediaBloc = sl<MediaBloc>();
   }
 
-  _triggerEvent(GetFilteredMediaParams getFilteredMediaParams) {
+  _triggerEvent(GetMediaParams getFilteredMediaParams) {
     mediaBloc.add(GetMediaWithParamsEvent(getFilteredMediaParams));
   }
 
@@ -31,21 +31,22 @@ class _ExplorePage extends State<ExplorePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("FlickFinder"),
-        actions: [IconButton(onPressed: () {}, icon: Icon(Icons.search))],
+        // actions: [IconButton(onPressed: () {}, icon: Icon(Icons.search))],
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(40.0),
+          preferredSize: const Size.fromHeight(70.0),
           child: FilterOptions(
             onApply: (filterparams) {
               print("newparams: $filterparams");
               _triggerEvent(
                   filterparams.copyWith(mediaType: mediaBloc.state.mediaType));
             },
-            onMediaTypeChange: (MediaType? newMediaType) {
-              _triggerEvent(GetFilteredMediaParams(mediaType: newMediaType));
+            onMediaTypeChange: (newparams) {
+              print(newparams);
+              _triggerEvent(newparams);
             },
             onClear: () {
-              _triggerEvent(
-                  GetFilteredMediaParams(mediaType: mediaBloc.state.mediaType));
+              _triggerEvent(GetMediaParams(
+                  mediaType: mediaBloc.state.mediaType, category: ''));
             },
           ),
         ),
@@ -54,7 +55,7 @@ class _ExplorePage extends State<ExplorePage> {
         create: (context) => mediaBloc
           ..add(
               GetMediaWithParamsEvent(mediaBloc.state.getFilteredMediaParams)),
-        child: MediaBuilder(),
+        child: MediaPage(),
       ),
     );
   }

@@ -1,24 +1,22 @@
 import 'dart:convert';
 
-import 'package:flickfinder/core/common/api_config.dart';
-import 'package:flickfinder/core/utils/enum.dart';
+import 'package:flickfinder/core/config/api_config.dart';
 import 'package:flickfinder/features/media/data/models/movie_model.dart';
 import 'package:flickfinder/features/media/data/models/tvshow_model.dart';
 import 'package:flickfinder/features/media/domain/usecases/getfilteredmedia.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import '../../../../core/errors/exception.dart';
 import '../../../filter/domain/entities/genreentity.dart';
-import '../../domain/entities/media_entity.dart';
 
 abstract class MediaRemoteDatasource {
   /// Calls the https://api.themoviedb.org/3/movie/popular endpoint.
   ///
   /// Throws a [ApiException] for all error codes
-  Future<List<MovieModel>> getMovies(int page);
-  Future<List<TvShowModel>> getTvShows(int page);
-  Future<List<MovieModel>> getFilteredMovies(GetFilteredMediaParams params);
-  Future<List<TvShowModel>> getFilteredTvShows(GetFilteredMediaParams params);
+
+  Future<List<MovieModel>> getMovies(GetMediaParams params);
+  Future<List<TvShowModel>> getTvShows(GetMediaParams params);
 }
 
 class MediaRemoteDatasourceImpl implements MediaRemoteDatasource {
@@ -27,16 +25,10 @@ class MediaRemoteDatasourceImpl implements MediaRemoteDatasource {
   MediaRemoteDatasourceImpl({required this.client});
 
   @override
-  Future<List<MovieModel>> getMovies(int page) =>
-      getMoviefromUrl("${ApiConfig.movies}?page=$page");
-  @override
-  Future<List<TvShowModel>> getTvShows(int page) =>
-      getTvShowfromUrl("${ApiConfig.tvShows}?page=$page");
-
-  @override
-  Future<List<MovieModel>> getFilteredMovies(GetFilteredMediaParams params) =>
-      getMoviefromUrl(getUrlFromParams(
+  Future<List<MovieModel>> getMovies(GetMediaParams params) =>
+      getMoviesFromUrl(getUrlFromParams(
         mediaUrl: ApiConfig.movies,
+        category: params.category,
         genre: params.genre,
         page: params.page,
         primaryReleaseDateGTE: params.primaryReleaseDateGTE,
@@ -51,9 +43,10 @@ class MediaRemoteDatasourceImpl implements MediaRemoteDatasource {
       ));
 
   @override
-  Future<List<TvShowModel>> getFilteredTvShows(GetFilteredMediaParams params) =>
+  Future<List<TvShowModel>> getTvShows(GetMediaParams params) =>
       getTvShowfromUrl(getUrlFromParams(
         mediaUrl: ApiConfig.tvShows,
+        category: params.category,
         genre: params.genre,
         page: params.page,
         primaryReleaseDateGTE: params.primaryReleaseDateGTE,
@@ -67,23 +60,40 @@ class MediaRemoteDatasourceImpl implements MediaRemoteDatasource {
         year: params.year,
       ));
 
-  Future<List<MovieModel>> getMoviefromUrl(String url) async {
-    print(url);
-    List<MovieModel> movies = [];
-    final response = await client.get(
-      Uri.parse(url),
-      headers: ApiConfig.getHeaders(),
-    );
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> _responseData = json.decode(response.body);
-      final List result = _responseData["results"];
-      result.forEach((movie) {
-        movies.add(MovieModel.fromJson(movie));
-      });
-      return movies;
-    } else {
+  Future<List<MovieModel>> getMoviesFromUrl(String url) async {
+    try {
+      // Log the URL for debugging
+      debugPrint('Fetching movies from: $url');
+
+      // Perform the HTTP GET request
+      final response = await client.get(
+        Uri.parse(url),
+        headers: ApiConfig.getHeaders(),
+      );
+
+      // Check if the request was successful
+      if (response.statusCode == 200) {
+        // Parse the JSON response
+        final Map<String, dynamic> responseData = json.decode(response.body);
+
+        // Extract the list of movie results
+        final List<dynamic> results = responseData["results"] ?? [];
+
+        // Map each result to a MovieModel instance and return the list
+        return results.map((movie) => MovieModel.fromJson(movie)).toList();
+      } else {
+        // Handle HTTP error responses
+        throw ApiException(
+          message: "Failed to load movies: ${response.reasonPhrase}",
+          statuscode: response.statusCode,
+        );
+      }
+    } catch (e) {
+      // Catch any other errors that may occur
       throw ApiException(
-          message: "${response.reasonPhrase}", statuscode: response.statusCode);
+        message: "An error occurred while fetching movies: $e",
+        statuscode: 500,
+      );
     }
   }
 
@@ -109,6 +119,8 @@ class MediaRemoteDatasourceImpl implements MediaRemoteDatasource {
 
   String getUrlFromParams(
       {required String mediaUrl,
+      String? category,
+      bool? isFiltered,
       List<GenreEntity>? genre,
       int? page,
       String? primaryReleaseDateGTE,
@@ -120,6 +132,7 @@ class MediaRemoteDatasourceImpl implements MediaRemoteDatasource {
       int? castId,
       String? region,
       int? year}) {
+    String categoryPath = "/$category";
     List<String> genreIds =
         genre == null ? [] : genre.map((genre) => genre.id.toString()).toList();
     String genreUrl = genre == null ? "" : "&with_genres=${genreIds.join(",")}";
@@ -142,7 +155,30 @@ class MediaRemoteDatasourceImpl implements MediaRemoteDatasource {
     String castIdUrl = castId == null ? "" : "&with_cast=$castId";
     String regionUrl = region == null ? "" : "&region=$region";
     String yearUrl = year == null ? "" : "&year=$year";
-
-    return "$mediaUrl$pageUrl$genreUrl$primaryReleaseDateGTEUrl$primaryReleaseDateLTEUrl$voteAverageGTEUrl$languageUrl$certificationCountryUrl$certificationUrl$castIdUrl$regionUrl$yearUrl";
+    // String discover = isFiltered! ? "/discover" : "";
+    return "${ApiConfig.apiHost}$mediaUrl$categoryPath$pageUrl$genreUrl$primaryReleaseDateGTEUrl$primaryReleaseDateLTEUrl$voteAverageGTEUrl$languageUrl$certificationCountryUrl$certificationUrl$castIdUrl$regionUrl$yearUrl";
   }
+
+  // String getCategoryPath(Enum? category) {
+  //   switch (category) {
+  //     case MoviesList.NowPlaying:
+  //       return "now_playing";
+  //     case MoviesList.TopRated:
+  //       return "top_rated";
+  //     case MoviesList.Popular:
+  //       return "popular";
+  //     case MoviesList.Upcoming:
+  //       return "upcoming";
+  //     case TvList.AiringToday:
+  //       return "airing_today";
+  //     case TvList.OnAir:
+  //       return "on_the_air";
+  //     case TvList.Popular:
+  //       return "popular";
+  //     case TvList.TopRated:
+  //       return "top_rated";
+  //     default:
+  //       return "";
+  //   }
+  // }
 }

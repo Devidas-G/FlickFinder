@@ -7,16 +7,13 @@ import 'package:flickfinder/features/filter/presentation/bloc/filter_bloc.dart';
 import 'package:flickfinder/features/media/domain/usecases/getfilteredmedia.dart';
 
 class GetFilterOptions
-    implements
-        UseCaseWithBloc<List<FilterEntity>, GetFilteredMediaParams,
-            FilterBloc> {
+    implements UseCaseWithBloc<List<FilterEntity>, FilterBloc> {
   final FilterRepo repository;
 
   GetFilterOptions(this.repository);
 
   @override
-  ResultFuture<List<FilterEntity>> call(
-      GetFilteredMediaParams params, FilterBloc filterBloc) async {
-    return await repository.getFilterOptions(params, filterBloc);
+  ResultFuture<List<FilterEntity>> call(FilterBloc filterBloc) async {
+    return await repository.getFilterOptions(filterBloc);
   }
 }
