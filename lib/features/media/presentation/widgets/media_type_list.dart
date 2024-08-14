@@ -4,8 +4,12 @@ import 'package:flutter/material.dart';
 class MediaTypeList extends StatefulWidget {
   final List<MediaType> mediaType;
   final ValueChanged<MediaType> onChanged;
+  final MediaType selectedMediaType;
   const MediaTypeList(
-      {super.key, required this.mediaType, required this.onChanged});
+      {super.key,
+      required this.mediaType,
+      required this.onChanged,
+      required this.selectedMediaType});
 
   @override
   State<MediaTypeList> createState() => _MediaTypeListState();
@@ -14,7 +18,6 @@ class MediaTypeList extends StatefulWidget {
 class _MediaTypeListState extends State<MediaTypeList> {
   @override
   Widget build(BuildContext context) {
-    MediaType _selectedType = widget.mediaType.first;
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.only(bottom: 5),
@@ -29,13 +32,10 @@ class _MediaTypeListState extends State<MediaTypeList> {
               child: TextButton(
                 onPressed: () {
                   widget.onChanged(type);
-                  setState(() {
-                    _selectedType = type;
-                  });
                 },
                 style: TextButton.styleFrom(
                   // padding: EdgeInsets.all(5),
-                  backgroundColor: _selectedType == type
+                  backgroundColor: widget.selectedMediaType == type
                       ? Theme.of(context).primaryColor
                       : Colors.transparent,
                   shape: RoundedRectangleBorder(

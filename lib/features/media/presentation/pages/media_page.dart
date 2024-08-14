@@ -24,8 +24,8 @@ class _MediaPageState extends State<MediaPage> {
   @override
   void initState() {
     super.initState();
-    List<String> initCats = _getCategories(selectedMediaType);
-    initialCategory = initCats.first;
+    List<String> _initCats = _getCategories(selectedMediaType);
+    initialCategory = _initCats.first;
     _scrollController.addListener(_onScroll);
   }
 
@@ -73,12 +73,17 @@ class _MediaPageState extends State<MediaPage> {
         bottom: PreferredSize(
             preferredSize: const Size.fromHeight(20),
             child: MediaTypeList(
-                mediaType: MediaType.values,
-                onChanged: (MediaType value) {
-                  setState(() {
-                    selectedMediaType = value;
-                  });
-                })),
+              mediaType: MediaType.values,
+              onChanged: (MediaType value) {
+                setState(() {
+                  selectedMediaType = value;
+                });
+                List<String> _initCats = _getCategories(selectedMediaType);
+                mediaBloc.add(GetMediaWithParamsEvent(GetMediaParams(
+                    mediaType: selectedMediaType, category: _initCats.first)));
+              },
+              selectedMediaType: selectedMediaType,
+            )),
       ),
       body: BlocProvider(
         create: (context) => mediaBloc
