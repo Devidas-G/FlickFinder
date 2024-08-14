@@ -68,17 +68,26 @@ class _MediaPageState extends State<MediaPage> {
     return Scaffold(
       appBar: AppBar(
         title: CategoryDropdown(
-            categories: _getCategories(selectedMediaType),
-            onChanged: (String? value) {}),
+          categories: _getCategories(selectedMediaType),
+          onChanged: (String? value) {
+            setState(() {
+              initialCategory = value!;
+            });
+            mediaBloc.add(GetMediaWithParamsEvent(
+                GetMediaParams(mediaType: selectedMediaType, category: value)));
+          },
+          selectedCategory: initialCategory,
+        ),
         bottom: PreferredSize(
             preferredSize: const Size.fromHeight(20),
             child: MediaTypeList(
               mediaType: MediaType.values,
               onChanged: (MediaType value) {
+                List<String> _initCats = _getCategories(value);
                 setState(() {
                   selectedMediaType = value;
+                  initialCategory = _initCats.first;
                 });
-                List<String> _initCats = _getCategories(selectedMediaType);
                 mediaBloc.add(GetMediaWithParamsEvent(GetMediaParams(
                     mediaType: selectedMediaType, category: _initCats.first)));
               },
