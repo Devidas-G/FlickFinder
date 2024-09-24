@@ -1,73 +1,52 @@
 part of 'media_bloc.dart';
 
-enum MediaStatus { initial, loadingMore, loaded, error }
-
 final class MediaState extends Equatable {
   const MediaState({
-    this.status = MediaStatus.initial,
-    this.media = const <MediaEntity>[],
-    this.hasReachedMax = false,
-    this.statusCode = 0,
-    this.message = "",
-    this.currentPage = 0,
-    this.mediaType = MediaType.Movies,
-    this.getFilteredMediaParams =
-        const GetMediaParams(mediaType: MediaType.Movies, category: ''),
+    this.mainMediaState = const MediaInitial(),
+    this.mainMedia = const [],
+    this.trendingMediaState = const TrendingMediaInitial(),
+    this.subMedia = const {},
+    this.getMediaParams =
+        const GetMediaParams(mediaType: MediaType.Movies, sortType: ''),
   });
-  final MediaStatus status;
-  final List<MediaEntity> media;
-  final bool hasReachedMax;
-  final int statusCode;
-  final int currentPage;
-  final String message;
-  final MediaType mediaType;
-  final GetMediaParams getFilteredMediaParams;
+  final MainMediaState mainMediaState;
+  final List<MediaEntity> mainMedia;
+  final TrendingMediaState trendingMediaState;
+  final GetMediaParams getMediaParams;
+  final Map<String, List<MediaEntity>> subMedia;
 
   @override
   List<Object> get props => [
-        status,
-        media,
-        hasReachedMax,
-        statusCode,
-        message,
-        currentPage,
-        mediaType,
-        getFilteredMediaParams,
+        mainMediaState,
+        mainMedia,
+        trendingMediaState,
+        getMediaParams,
+        subMedia,
       ];
 
   MediaState copyWith({
-    MediaStatus? status,
-    List<MediaEntity>? media,
-    bool? hasReachedMax,
-    int? statusCode,
-    String? message,
-    int? currentPage,
-    MediaType? mediaType,
+    MainMediaState? mainMediaState,
+    List<MediaEntity>? mainMedia,
+    TrendingMediaState? trendingMediaState,
     GetMediaParams? getFilteredMediaParams,
+    Map<String, List<MediaEntity>>? subMedia,
   }) {
     return MediaState(
-        status: status ?? this.status,
-        media: media ?? this.media,
-        hasReachedMax: hasReachedMax ?? this.hasReachedMax,
-        statusCode: statusCode ?? this.statusCode,
-        message: message ?? this.message,
-        currentPage: currentPage ?? this.currentPage,
-        mediaType: mediaType ?? this.mediaType,
-        getFilteredMediaParams:
-            getFilteredMediaParams ?? this.getFilteredMediaParams);
+        mainMediaState: mainMediaState ?? this.mainMediaState,
+        mainMedia: mainMedia ?? this.mainMedia,
+        trendingMediaState: trendingMediaState ?? this.trendingMediaState,
+        getMediaParams: getFilteredMediaParams ?? this.getMediaParams,
+        subMedia: subMedia ?? this.subMedia);
   }
 
   @override
   String toString() {
     return '''PostState { 
-      status: $status, 
-      hasReachedMax: $hasReachedMax, 
-      mediaLength: ${media.length}, 
-      statusCode: $statusCode, 
-      message: $message, 
-      currentPage: $currentPage, 
-      MediaType: $mediaType,
-      FilterParams: $getFilteredMediaParams,
+      MainMediaState: $mainMediaState,
+      mainMedia: $mainMedia,
+      TrendingMedia: $trendingMediaState,
+      FilterParams: $getMediaParams,
+      subMedia: $subMedia,
       }''';
   }
 }

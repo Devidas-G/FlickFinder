@@ -1,17 +1,16 @@
 import 'package:flickfinder/core/utils/enum.dart';
-import 'package:flickfinder/features/media/domain/usecases/getfilteredmedia.dart';
+import 'package:flickfinder/features/media/domain/usecases/getmedia.dart';
+import 'package:flickfinder/features/media/presentation/bloc/states/main_media.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import '../../../../injection_container.dart';
+import '../../../../providers/homepagestateprovider.dart';
 import '../../domain/entities/media_entity.dart';
 import '../bloc/media_bloc.dart';
 import '../widgets/widgets.dart';
 
-typedef BS = MediaStatus;
-
 class MediaPage extends StatefulWidget {
-  MediaPage({super.key});
-
   @override
   State<MediaPage> createState() => _MediaPageState();
 }
@@ -19,22 +18,23 @@ class MediaPage extends StatefulWidget {
 class _MediaPageState extends State<MediaPage> {
   final ScrollController _scrollController = ScrollController();
   final MediaBloc mediaBloc = sl<MediaBloc>();
-  MediaType selectedMediaType = MediaType.values.first;
-  late String initialCategory;
+  late HomeState homeState;
   @override
   void initState() {
     super.initState();
-    List<String> _initCats = _getCategories(selectedMediaType);
-    initialCategory = _initCats.first;
     _scrollController.addListener(_onScroll);
   }
 
   void _onScroll() {
     if (_isBottom) {
-      final GetMediaParams getFilteredMediaParams =
-          mediaBloc.state.getFilteredMediaParams;
+      final GetMediaParams getMediaParams = mediaBloc.state.getMediaParams;
       mediaBloc.add(GetMoreMediaEvent());
     }
+  }
+
+  void _loadMore() {
+    final GetMediaParams getMediaParams = mediaBloc.state.getMediaParams;
+    mediaBloc.add(GetMoreMediaEvent());
   }
 
   bool get _isBottom {
@@ -52,95 +52,109 @@ class _MediaPageState extends State<MediaPage> {
     super.dispose();
   }
 
-  List<String> _getCategories(MediaType mediaType) {
+  List<String> _getSortTypes(MediaType mediaType) {
     switch (mediaType) {
       case MediaType.Movies:
-        return MoviesList.values.map((cat) => cat.name).toList();
+        return MoviesSortTypes.values.map((cat) => cat.name).toList();
       case MediaType.TvShows:
-        return TvList.values.map((cat) => cat.name).toList();
+        return TvSortTypes.values.map((cat) => cat.name).toList();
       default:
         return [];
     }
   }
 
+  final List<String> dropDownItems = ['Movies', 'TvShows'];
   @override
   Widget build(BuildContext context) {
+    homeState = Provider.of<HomeState>(context);
     return Scaffold(
       appBar: AppBar(
-        title: CategoryDropdown(
-          categories: _getCategories(selectedMediaType),
-          onChanged: (String? value) {
-            setState(() {
-              initialCategory = value!;
-            });
-            mediaBloc.add(GetMediaWithParamsEvent(
-                GetMediaParams(mediaType: selectedMediaType, category: value)));
+        title: DropdownMenu<MediaType>(
+          label: Text("FlickFinder"),
+          initialSelection: MediaType.values.first,
+          inputDecorationTheme: InputDecorationTheme(border: InputBorder.none),
+          dropdownMenuEntries: MediaType.values
+              .map((MediaType media) =>
+                  DropdownMenuEntry<MediaType>(value: media, label: media.name))
+              .toList(),
+          onSelected: (value) {
+            List<String> _selectedSortTypes = _getSortTypes(value!);
+            homeState.currentMediaType = value;
+            homeState.currentSortType = _selectedSortTypes.first;
+            mediaBloc.add(GetInitialMediaEvent(GetMediaParams(
+                mediaType: value, sortType: _selectedSortTypes.first)));
           },
-          selectedCategory: initialCategory,
         ),
+        actions: [
+          IconButton(onPressed: () {}, icon: Icon(Icons.favorite_border_sharp))
+        ],
         bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(20),
-            child: MediaTypeList(
-              mediaType: MediaType.values,
-              onChanged: (MediaType value) {
-                List<String> _initCats = _getCategories(value);
-                setState(() {
-                  selectedMediaType = value;
-                  initialCategory = _initCats.first;
-                });
-                mediaBloc.add(GetMediaWithParamsEvent(GetMediaParams(
-                    mediaType: selectedMediaType, category: _initCats.first)));
+            preferredSize: const Size(double.infinity, 25),
+            child: SortTypeList(
+              sortTypes: _getSortTypes(homeState.currentMediaType),
+              onChanged: (String value) {
+                homeState.currentSortType = value;
+                mediaBloc.add(GetInitialMediaEvent(GetMediaParams(
+                    mediaType: homeState.currentMediaType, sortType: value)));
               },
-              selectedMediaType: selectedMediaType,
+              selectedMediaType: homeState.currentSortType,
             )),
       ),
       body: BlocProvider(
         create: (context) => mediaBloc
-          ..add(GetMediaWithParamsEvent(GetMediaParams(
-              mediaType: selectedMediaType, category: initialCategory))),
+          ..add(GetInitialMediaEvent(GetMediaParams(
+              mediaType: homeState.currentMediaType,
+              sortType: homeState.currentSortType)))
+          ..add(GetTrendingMediaEvent()),
         child: BlocBuilder<MediaBloc, MediaState>(
           builder: (BuildContext context, MediaState state) {
-            return ListView(
-              physics: const BouncingScrollPhysics(),
-              controller: _scrollController,
-              children: [
-                if (state.media.isNotEmpty)
-                  MediaGrid(
-                    media: state.media,
-                    onTap: (MediaEntity value) {},
-                  ),
-                if (state.status != BS.loaded)
-                  (() {
-                    switch (state.status) {
-                      case BS.initial:
-                        return const LoadingWidget(message: "initializing...");
-                      case BS.error:
-                        return MessageDisplay(
-                          message: state.message,
-                          code: state.statusCode,
-                          onRetry: () {
-                            mediaBloc.add(GetMediaWithParamsEvent(
-                                state.getFilteredMediaParams.copyWith(
-                                    mediaType: selectedMediaType,
-                                    category: initialCategory)));
-                          },
-                        );
-                      case BS.loadingMore:
-                        return const LoadingWidget(message: "Loading...");
-                      default:
-                        return MessageDisplay(
-                          message: 'Something went wrong',
-                          code: 0,
-                          onRetry: () {
-                            mediaBloc.add(GetMediaWithParamsEvent(
-                                state.getFilteredMediaParams.copyWith(
-                                    mediaType: selectedMediaType,
-                                    category: initialCategory)));
-                          },
-                        );
-                    }
-                  }()),
-              ],
+            return Center(
+              child: SingleChildScrollView(
+                controller: _scrollController,
+                physics: const BouncingScrollPhysics(),
+                child: Column(
+                  children: [
+                    if (state.mainMedia.isNotEmpty)
+                      MediaGrid(
+                        media: state.mainMedia,
+                        onTap: (MediaEntity value) {},
+                      ),
+                    if (state.mainMediaState.runtimeType != MediaLoaded)
+                      (() {
+                        switch (state.mainMediaState.runtimeType) {
+                          case MediaInitial:
+                            return const LoadingWidget(
+                                message: "initializing...");
+                          case MediaError:
+                            return MessageDisplay(
+                              message:
+                                  (state.mainMediaState as MediaError).error,
+                              code: (state.mainMediaState as MediaError).code,
+                              onRetry: () {
+                                mediaBloc.add(GetInitialMediaEvent(
+                                    state.getMediaParams.copyWith(
+                                        mediaType: homeState.currentMediaType,
+                                        sortType: homeState.currentSortType)));
+                              },
+                            );
+                          case MediaLoading:
+                            return const LoadingWidget(message: "Loading...");
+                          default:
+                            return MessageDisplay(
+                              message: 'Something went wrong',
+                              code: 0,
+                              onRetry: () {
+                                mediaBloc.add(GetInitialMediaEvent(
+                                    state.getMediaParams.copyWith(
+                                        mediaType: homeState.currentMediaType,
+                                        sortType: homeState.currentSortType)));
+                              },
+                            );
+                        }
+                      }()),
+                  ],
+                ),
+              ),
             );
           },
         ),

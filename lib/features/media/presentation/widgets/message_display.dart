@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 
 class MessageDisplay extends StatelessWidget {
   final String message;
-  final int code;
+  final int? code;
   final VoidCallback onRetry;
 
   const MessageDisplay({
     Key? key,
     required this.message,
-    required this.code,
+    this.code,
     required this.onRetry,
   }) : super(key: key);
 
@@ -16,7 +16,6 @@ class MessageDisplay extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(message),
           const SizedBox(

@@ -6,6 +6,10 @@ abstract class UseCase<Type, Params> {
   ResultFuture<Type> call(Params params);
 }
 
+abstract class UseCaseWithNoParams<Type> {
+  ResultFuture<Type> call();
+}
+
 class NoParams extends Equatable {
   @override
   List<Object> get props => [];

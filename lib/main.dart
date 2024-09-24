@@ -5,6 +5,7 @@ import 'package:flickfinder/views/dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flickfinder/injection_container.dart' as di;
 import 'package:provider/provider.dart';
+import 'package:flutter/rendering.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,6 +20,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPaintSizeEnabled = true;
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
@@ -63,10 +65,16 @@ class MyApp extends StatelessWidget {
                       borderRadius: BorderRadius.zero,
                       side: BorderSide(color: Colors.black)),
                   foregroundColor: Colors.black)),
+          bottomNavigationBarTheme: BottomNavigationBarThemeData(
+              showSelectedLabels: false,
+              showUnselectedLabels: false,
+              backgroundColor: Colors.white,
+              selectedIconTheme: IconThemeData(color: Colors.purple),
+              unselectedIconTheme: IconThemeData(color: Colors.grey)),
           primaryColor: Colors.purple,
           primarySwatch: Colors.purple,
         ),
-        home: const Homepage(),
+        home: const Dashboard(),
       ),
     );
   }
