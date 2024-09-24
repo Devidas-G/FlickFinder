@@ -8,7 +8,7 @@ import 'package:flickfinder/features/media/data/models/movie_model.dart';
 import 'package:flickfinder/features/media/data/models/tvshow_model.dart';
 import 'package:flickfinder/features/media/domain/entities/media_entity.dart';
 import 'package:flickfinder/features/media/domain/repositories/media_repo.dart';
-import 'package:flickfinder/features/media/domain/usecases/getfilteredmedia.dart';
+import 'package:flickfinder/features/media/domain/usecases/getmedia.dart';
 
 import '../../../../core/errors/failure.dart';
 
@@ -37,10 +37,10 @@ class MediaRepoImpl implements MediaRepo {
         final remoteresult = await _movieDataSource();
         return Right(remoteresult);
       } on ApiException catch (e) {
-        return Left(ApiFailure(e.statuscode));
+        return Left(ApiFailure(e.statuscode, e.message));
       }
     } else {
-      return const Left(NetworkFailure(1));
+      return const Left(NetworkFailure(1, "NO Internet"));
     }
   }
 
@@ -51,10 +51,24 @@ class MediaRepoImpl implements MediaRepo {
         final remoteresult = await _tvShowDataSource();
         return Right(remoteresult);
       } on ApiException catch (e) {
-        return Left(ApiFailure(e.statuscode));
+        return Left(ApiFailure(e.statuscode, e.message));
       }
     } else {
-      return const Left(NetworkFailure(1));
+      return const Left(NetworkFailure(1, "NO Internet"));
+    }
+  }
+
+  @override
+  ResultFuture<List<MediaEntity>> getTrending() async {
+    if (await networkInfo.isConnected) {
+      try {
+        final remoteresult = await remoteDatasource.getTrending();
+        return Right(remoteresult);
+      } on ApiException catch (e) {
+        return Left(ApiFailure(e.statuscode, e.message));
+      }
+    } else {
+      return const Left(NetworkFailure(1, "NO Internet"));
     }
   }
 }

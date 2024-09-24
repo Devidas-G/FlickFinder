@@ -1,53 +1,73 @@
-import 'package:flickfinder/features/media/presentation/pages/media_page.dart';
+import 'package:flickfinder/features/media/media.dart';
+import 'package:flickfinder/features/search/presentation/pages/search_page.dart';
 import 'package:flickfinder/providers/homepagestateprovider.dart';
-import 'package:flickfinder/views/homepage.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class Homepage extends StatefulWidget {
-  const Homepage({super.key});
+import '../core/utils/enum.dart';
+import '../injection_container.dart';
+
+class Dashboard extends StatefulWidget {
+  const Dashboard({super.key});
 
   @override
-  State<Homepage> createState() => _HomepageState();
+  State<Dashboard> createState() => _DashboardState();
 }
 
-class _HomepageState extends State<Homepage> {
+class _DashboardState extends State<Dashboard> {
   late HomeState homeState;
   final PageController _pageViewController = PageController();
+  final List<Widget> pageViewChilderns = [];
+  final List<Map<String, dynamic>> bottomAppBarItems = [
+    {"icon": Icons.home, "label": "Home"},
+    {"icon": Icons.search, "label": "Search"},
+    {"icon": Icons.trending_up_sharp, "label": "Trending"},
+    {"icon": Icons.account_circle_sharp, "label": "Account"},
+  ];
 
   @override
   Widget build(BuildContext context) {
     homeState = Provider.of<HomeState>(context);
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: PageView(
         controller: _pageViewController,
         children: [
           MediaPage(),
-          // Container(
-          //   child: Center(child: Text("Account")),
-          // ),
+          SearchPage(),
+          Container(
+            child: Center(child: Text("Trending")),
+          ),
+          Container(
+            child: Center(child: Text("Account")),
+          )
         ],
         onPageChanged: (index) {
-          homeState.pageindex = index;
+          homeState.currentindex = index;
         },
       ),
-      // bottomNavigationBar: BottomNavigationBar(
-      //   currentIndex: homeState.pageindex,
-      //   onTap: (index) {
-      //     _pageViewController.animateToPage(index,
-      //         duration: Duration(milliseconds: 200), curve: Curves.bounceOut);
-      //   },
-      //   items: const [
-      //     BottomNavigationBarItem(
-      //       icon: Icon(Icons.tv),
-      //       label: 'Explore',
-      //     ),
-      //     BottomNavigationBarItem(
-      //       icon: Icon(Icons.person),
-      //       label: 'Account',
-      //     ),
-      //   ],
-      // ),
+      bottomNavigationBar: BottomAppBar(
+        padding: EdgeInsets.zero,
+        height: 50,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: bottomAppBarItems.asMap().entries.map((entry) {
+            int index = entry.key;
+            Map<String, dynamic> item = entry.value;
+            return IconButton(
+              onPressed: () {
+                _pageViewController.animateToPage(index,
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.bounceOut);
+              },
+              color: homeState.currentindex == index
+                  ? Theme.of(context).primaryColor
+                  : Colors.grey,
+              icon: Icon(item["icon"]),
+            );
+          }).toList(),
+        ),
+      ),
     );
   }
 }

@@ -14,22 +14,25 @@ class MediaEntity extends Equatable {
   final bool video;
   final double voteAverage;
   final int voteCount;
+  final String? mediaType;
+  final bool? adult;
 
-  const MediaEntity({
-    required this.backdropPath,
-    required this.genreIds,
-    required this.id,
-    required this.originalLanguage,
-    required this.originalTitle,
-    required this.overview,
-    required this.popularity,
-    required this.posterPath,
-    required this.releaseDate,
-    required this.title,
-    required this.video,
-    required this.voteAverage,
-    required this.voteCount,
-  });
+  const MediaEntity(
+      {required this.backdropPath,
+      required this.genreIds,
+      required this.id,
+      required this.originalLanguage,
+      required this.originalTitle,
+      required this.overview,
+      required this.popularity,
+      required this.posterPath,
+      required this.releaseDate,
+      required this.title,
+      required this.video,
+      required this.voteAverage,
+      required this.voteCount,
+      this.mediaType,
+      this.adult});
 
   @override
   List<Object?> get props => [
@@ -46,5 +49,7 @@ class MediaEntity extends Equatable {
         video,
         voteAverage,
         voteCount,
+        mediaType,
+        adult
       ];
 }

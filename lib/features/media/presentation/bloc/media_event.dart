@@ -7,16 +7,22 @@ sealed class MediaEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class GetMediaWithParamsEvent extends MediaEvent {
-  final GetMediaParams getFilteredMediaParams;
-  const GetMediaWithParamsEvent(this.getFilteredMediaParams);
+class GetInitialMediaEvent extends MediaEvent {
+  final GetMediaParams getMediaParams;
+  const GetInitialMediaEvent(this.getMediaParams);
 
   @override
-  List<Object> get props => [getFilteredMediaParams];
+  List<Object> get props => [getMediaParams];
 }
 
 class GetMoreMediaEvent extends MediaEvent {
   const GetMoreMediaEvent();
+  @override
+  List<Object> get props => [];
+}
+
+class GetTrendingMediaEvent extends MediaEvent {
+  const GetTrendingMediaEvent();
   @override
   List<Object> get props => [];
 }

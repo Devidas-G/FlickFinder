@@ -1,51 +1,54 @@
 import 'package:flickfinder/core/utils/enum.dart';
 import 'package:flutter/material.dart';
 
-class MediaTypeList extends StatefulWidget {
-  final List<MediaType> mediaType;
-  final ValueChanged<MediaType> onChanged;
-  final MediaType selectedMediaType;
-  const MediaTypeList(
+class SortTypeList extends StatelessWidget {
+  final List<String> sortTypes;
+  final ValueChanged<String> onChanged;
+  final String selectedMediaType;
+  const SortTypeList(
       {super.key,
-      required this.mediaType,
+      required this.sortTypes,
       required this.onChanged,
       required this.selectedMediaType});
 
   @override
-  State<MediaTypeList> createState() => _MediaTypeListState();
-}
-
-class _MediaTypeListState extends State<MediaTypeList> {
-  @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 5),
-        child: ListView.builder(
-          itemCount: widget.mediaType.length,
-          physics: BouncingScrollPhysics(),
-          scrollDirection: Axis.horizontal,
-          itemBuilder: (BuildContext context, int index) {
-            MediaType type = widget.mediaType[index];
-            return Padding(
-              padding: const EdgeInsets.only(left: 8.0),
-              child: TextButton(
-                onPressed: () {
-                  widget.onChanged(type);
-                },
-                style: TextButton.styleFrom(
-                  // padding: EdgeInsets.all(5),
-                  backgroundColor: widget.selectedMediaType == type
-                      ? Theme.of(context).primaryColor
-                      : Colors.transparent,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5),
-                      side: BorderSide(color: Colors.grey.shade800)),
-                ),
-                child: Text(type.name),
-              ),
-            );
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        child: ToggleButtons(
+          renderBorder: false,
+          isSelected: List.generate(
+            sortTypes.length,
+            (index) => selectedMediaType == sortTypes[index],
+          ),
+          onPressed: (index) {
+            onChanged(sortTypes[index]);
           },
+          // borderRadius: BorderRadius.circular(8),
+          selectedColor: Colors.white,
+          fillColor: Theme.of(context).primaryColor,
+          color: Colors.grey.shade700,
+          borderColor: Colors.grey.shade400,
+          selectedBorderColor: Theme.of(context).primaryColor,
+          splashColor: Colors.blue.withOpacity(0.2),
+          children: List.generate(
+            sortTypes.length,
+            (index) {
+              return Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Text(
+                  sortTypes[index],
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              );
+            },
+          ),
         ),
       ),
     );

@@ -1,14 +1,16 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flickfinder/core/config/api_config.dart';
 import 'package:flickfinder/features/media/data/models/movie_model.dart';
+import 'package:flickfinder/features/media/data/models/trending_model.dart';
 import 'package:flickfinder/features/media/data/models/tvshow_model.dart';
-import 'package:flickfinder/features/media/domain/usecases/getfilteredmedia.dart';
+import 'package:flickfinder/features/media/domain/entities/media_entity.dart';
+import 'package:flickfinder/features/media/domain/usecases/getmedia.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import '../../../../core/errors/exception.dart';
-import '../../../filter/domain/entities/genreentity.dart';
 
 abstract class MediaRemoteDatasource {
   /// Calls the https://api.themoviedb.org/3/movie/popular endpoint.
@@ -17,28 +19,18 @@ abstract class MediaRemoteDatasource {
 
   Future<List<MovieModel>> getMovies(GetMediaParams params);
   Future<List<TvShowModel>> getTvShows(GetMediaParams params);
+  Future<List<TrendingModel>> getTrending();
 }
 
 class MediaRemoteDatasourceImpl implements MediaRemoteDatasource {
-  final http.Client client;
-
-  MediaRemoteDatasourceImpl({required this.client});
+  MediaRemoteDatasourceImpl();
 
   @override
   Future<List<MovieModel>> getMovies(GetMediaParams params) =>
       getMoviesFromUrl(getUrlFromParams(
         mediaUrl: ApiConfig.movies,
-        category: params.category,
-        genre: params.genre,
+        category: params.sortType,
         page: params.page,
-        primaryReleaseDateGTE: params.primaryReleaseDateGTE,
-        primaryReleaseDateLTE: params.primaryReleaseDateLTE,
-        voteAverageGTE: params.voteAverageGTE,
-        language: params.language,
-        certificationCountry: params.certificationCountry,
-        certification: params.certification,
-        castId: params.castId,
-        region: params.region,
         year: params.year,
       ));
 
@@ -46,27 +38,17 @@ class MediaRemoteDatasourceImpl implements MediaRemoteDatasource {
   Future<List<TvShowModel>> getTvShows(GetMediaParams params) =>
       getTvShowfromUrl(getUrlFromParams(
         mediaUrl: ApiConfig.tvShows,
-        category: params.category,
-        genre: params.genre,
+        category: params.sortType,
         page: params.page,
-        primaryReleaseDateGTE: params.primaryReleaseDateGTE,
-        primaryReleaseDateLTE: params.primaryReleaseDateLTE,
-        voteAverageGTE: params.voteAverageGTE,
-        language: params.language,
-        certificationCountry: params.certificationCountry,
-        certification: params.certification,
-        castId: params.castId,
-        region: params.region,
         year: params.year,
       ));
 
   Future<List<MovieModel>> getMoviesFromUrl(String url) async {
     try {
       // Log the URL for debugging
-      debugPrint('Fetching movies from: $url');
 
       // Perform the HTTP GET request
-      final response = await client.get(
+      final response = await http.get(
         Uri.parse(url),
         headers: ApiConfig.getHeaders(),
       );
@@ -83,15 +65,29 @@ class MediaRemoteDatasourceImpl implements MediaRemoteDatasource {
         return results.map((movie) => MovieModel.fromJson(movie)).toList();
       } else {
         // Handle HTTP error responses
-        throw ApiException(
-          message: "Failed to load movies: ${response.reasonPhrase}",
-          statuscode: response.statusCode,
-        );
+        throw HttpException('${response}');
       }
+    } on SocketException catch (e) {
+      throw ApiException(
+        message: e.message,
+        statuscode: e.osError!.errorCode,
+      );
+    } on HttpException catch (e) {
+      throw ApiException(
+        message: e.message,
+      );
+    } on FormatException catch (e) {
+      throw ApiException(
+        message: e.message,
+      );
+    } on http.ClientException catch (e) {
+      throw ApiException(
+        message: e.message,
+      );
     } catch (e) {
       // Catch any other errors that may occur
       throw ApiException(
-        message: "An error occurred while fetching movies: $e",
+        message: "Unknow error occurred while fetching movies: $e",
         statuscode: 500,
       );
     }
@@ -100,10 +96,9 @@ class MediaRemoteDatasourceImpl implements MediaRemoteDatasource {
   Future<List<TvShowModel>> getTvShowfromUrl(String url) async {
     try {
       // Log the URL for debugging
-      debugPrint('Fetching movies from: $url');
 
       // Perform the HTTP GET request
-      final response = await client.get(
+      final response = await http.get(
         Uri.parse(url),
         headers: ApiConfig.getHeaders(),
       );
@@ -120,15 +115,29 @@ class MediaRemoteDatasourceImpl implements MediaRemoteDatasource {
         return results.map((tvShow) => TvShowModel.fromJson(tvShow)).toList();
       } else {
         // Handle HTTP error responses
-        throw ApiException(
-          message: "Failed to load movies: ${response.reasonPhrase}",
-          statuscode: response.statusCode,
-        );
+        throw HttpException('${response}');
       }
+    } on SocketException catch (e) {
+      throw ApiException(
+        message: e.message,
+        statuscode: e.osError!.errorCode,
+      );
+    } on HttpException catch (e) {
+      throw ApiException(
+        message: e.message,
+      );
+    } on FormatException catch (e) {
+      throw ApiException(
+        message: e.message,
+      );
+    } on http.ClientException catch (e) {
+      throw ApiException(
+        message: e.message,
+      );
     } catch (e) {
       // Catch any other errors that may occur
       throw ApiException(
-        message: "An error occurred while fetching movies: $e",
+        message: "Unknow error occurred while fetching movies: $e",
         statuscode: 500,
       );
     }
@@ -138,42 +147,53 @@ class MediaRemoteDatasourceImpl implements MediaRemoteDatasource {
       {required String mediaUrl,
       String? category,
       bool? isFiltered,
-      List<GenreEntity>? genre,
       int? page,
-      String? primaryReleaseDateGTE,
-      String? primaryReleaseDateLTE,
-      double? voteAverageGTE,
-      String? language,
-      String? certificationCountry,
-      String? certification,
-      int? castId,
-      String? region,
       int? year}) {
     String categoryPath = "/$category";
-    List<String> genreIds =
-        genre == null ? [] : genre.map((genre) => genre.id.toString()).toList();
-    String genreUrl = genre == null ? "" : "&with_genres=${genreIds.join(",")}";
     String pageUrl = page == null ? "" : "?page=$page";
-    String primaryReleaseDateGTEUrl = primaryReleaseDateGTE == null
-        ? ""
-        : "&primary_release_date.gte=$primaryReleaseDateGTE";
-    String primaryReleaseDateLTEUrl = primaryReleaseDateLTE == null
-        ? ""
-        : "&primary_release_date.lte=$primaryReleaseDateLTE";
-    String voteAverageGTEUrl =
-        voteAverageGTE == null ? "" : "&vote_average.gte=$voteAverageGTE";
-    String languageUrl =
-        language == null ? "" : "&with_original_language=$language";
-    String certificationCountryUrl = certificationCountry == null
-        ? ""
-        : "&certification_country=$certificationCountry";
-    String certificationUrl =
-        certification == null ? "" : "&certification=$certification";
-    String castIdUrl = castId == null ? "" : "&with_cast=$castId";
-    String regionUrl = region == null ? "" : "&region=$region";
     String yearUrl = year == null ? "" : "&year=$year";
     // String discover = isFiltered! ? "/discover" : "";
-    return "${ApiConfig.apiHost}$mediaUrl$categoryPath$pageUrl$genreUrl$primaryReleaseDateGTEUrl$primaryReleaseDateLTEUrl$voteAverageGTEUrl$languageUrl$certificationCountryUrl$certificationUrl$castIdUrl$regionUrl$yearUrl";
+    return "${ApiConfig.apiHost}$mediaUrl$categoryPath$pageUrl$yearUrl";
+  }
+
+  @override
+  Future<List<TrendingModel>> getTrending() async {
+    String url = 'https://api.themoviedb.org/3/trending/all/day?language=en-US';
+    try {
+      // Log the URL for debugging
+
+      // Perform the HTTP GET request
+      final response = await http.get(
+        Uri.parse(url),
+        headers: ApiConfig.getHeaders(),
+      );
+
+      // Check if the request was successful
+      if (response.statusCode == 200) {
+        // Parse the JSON response
+        final Map<String, dynamic> responseData = json.decode(response.body);
+
+        // Extract the list of movie results
+        final List<dynamic> results = responseData["results"] ?? [];
+
+        // Map each result to a MovieModel instance and return the list
+        return results
+            .map((trending) => TrendingModel.fromJson(trending))
+            .toList();
+      } else {
+        // Handle HTTP error responses
+        throw ApiException(
+          message: "Failed to load trending: ${response.reasonPhrase}",
+          statuscode: response.statusCode,
+        );
+      }
+    } catch (e) {
+      // Catch any other errors that may occur
+      throw ApiException(
+        message: "An error occurred while fetching trending: $e",
+        statuscode: 500,
+      );
+    }
   }
 
   // String getCategoryPath(Enum? category) {
