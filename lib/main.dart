@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    debugPaintSizeEnabled = true;
+    debugPaintSizeEnabled = false;
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
@@ -31,6 +31,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'Flick Finder',
         theme: ThemeData(
+          scaffoldBackgroundColor: Colors.grey.shade200,
           appBarTheme: const AppBarTheme(
               backgroundColor: Colors.white,
               elevation: 0,
@@ -55,7 +56,8 @@ class MyApp extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor:
                   Colors.purple, // Change this color to your desired color
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15)),
               foregroundColor: Colors.white,
             ),
           ),
@@ -65,12 +67,17 @@ class MyApp extends StatelessWidget {
                       borderRadius: BorderRadius.zero,
                       side: BorderSide(color: Colors.black)),
                   foregroundColor: Colors.black)),
+          expansionTileTheme: ExpansionTileThemeData(
+              backgroundColor: Colors.white,
+              collapsedBackgroundColor: Colors.white,
+              shape: Border()),
           bottomNavigationBarTheme: BottomNavigationBarThemeData(
               showSelectedLabels: false,
               showUnselectedLabels: false,
-              backgroundColor: Colors.white,
+              // backgroundColor: Colors.white,
               selectedIconTheme: IconThemeData(color: Colors.purple),
               unselectedIconTheme: IconThemeData(color: Colors.grey)),
+          bottomAppBarTheme: BottomAppBarTheme(color: Colors.white),
           primaryColor: Colors.purple,
           primarySwatch: Colors.purple,
         ),

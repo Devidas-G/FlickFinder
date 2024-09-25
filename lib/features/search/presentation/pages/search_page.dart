@@ -27,12 +27,40 @@ class _SearchPage extends State<SearchPage> {
                       borderRadius: BorderRadius.circular(15)),
                   prefixIcon: Icon(Icons.search),
                   suffixIcon: TextButton(
+                      style: TextButton.styleFrom(side: BorderSide.none),
                       onPressed: () {
                         print("object");
                       },
                       child: Text("Clear"))),
             ),
           ),
+        ),
+        body: Column(
+          children: [
+            ListTileTheme(
+              horizontalTitleGap: 0,
+              minLeadingWidth: 0,
+              minVerticalPadding: 0,
+              child: ExpansionTile(
+                dense: true,
+                minTileHeight: 0,
+                title: Text("Advance Search"),
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.grey),
+                          onPressed: () {},
+                          child: Text("Reset")),
+                      ElevatedButton(onPressed: () {}, child: Text("Apply")),
+                    ],
+                  ),
+                ],
+              ),
+            )
+          ],
         ),
       ),
     );
