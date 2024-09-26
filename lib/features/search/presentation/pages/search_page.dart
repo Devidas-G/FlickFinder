@@ -1,3 +1,4 @@
+import 'package:flickfinder/features/search/presentation/widgets/advance_search.dart';
 import 'package:flutter/material.dart';
 
 class SearchPage extends StatefulWidget {
@@ -8,6 +9,7 @@ class SearchPage extends StatefulWidget {
 class _SearchPage extends State<SearchPage> {
   @override
   Widget build(BuildContext context) {
+    var size = MediaQuery.of(context).size;
     return GestureDetector(
       onTap: () {
         FocusManager.instance.primaryFocus?.unfocus();
@@ -37,28 +39,9 @@ class _SearchPage extends State<SearchPage> {
         ),
         body: Column(
           children: [
-            ListTileTheme(
-              horizontalTitleGap: 0,
-              minLeadingWidth: 0,
-              minVerticalPadding: 0,
-              child: ExpansionTile(
-                dense: true,
-                minTileHeight: 0,
-                title: Text("Advance Search"),
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.grey),
-                          onPressed: () {},
-                          child: Text("Reset")),
-                      ElevatedButton(onPressed: () {}, child: Text("Apply")),
-                    ],
-                  ),
-                ],
-              ),
+            AdvanceSearch(
+              onClear: () {},
+              onApply: () {},
             )
           ],
         ),
