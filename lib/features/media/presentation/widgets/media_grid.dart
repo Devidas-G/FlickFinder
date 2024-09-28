@@ -15,7 +15,7 @@ class MediaGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    var size = MediaQuery.of(context).size;
     return GridView.builder(
         physics: const NeverScrollableScrollPhysics(),
         shrinkWrap: true,
@@ -30,6 +30,7 @@ class MediaGrid extends StatelessWidget {
           MediaEntity mediaEntity = media[index];
           return MediaCard(
             media: mediaEntity,
+            onTap: () => onTap(mediaEntity),
           );
         });
   }

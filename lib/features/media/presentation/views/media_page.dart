@@ -1,6 +1,7 @@
 import 'package:flickfinder/core/utils/enum.dart';
 import 'package:flickfinder/features/media/domain/usecases/getmedia.dart';
 import 'package:flickfinder/features/media/presentation/bloc/states/main_media.dart';
+import 'package:flickfinder/features/media/presentation/views/media_view_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
@@ -117,7 +118,12 @@ class _MediaPageState extends State<MediaPage> {
                     if (state.mainMedia.isNotEmpty)
                       MediaGrid(
                         media: state.mainMedia,
-                        onTap: (MediaEntity value) {},
+                        onTap: (MediaEntity media) {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => MediaViewPage(
+                                    media: media,
+                                  )));
+                        },
                       ),
                     if (state.mainMediaState.runtimeType != MediaLoaded)
                       (() {
