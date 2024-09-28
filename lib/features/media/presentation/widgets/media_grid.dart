@@ -30,6 +30,7 @@ class MediaGrid extends StatelessWidget {
           MediaEntity mediaEntity = media[index];
           return MediaCard(
             media: mediaEntity,
+            onTap: () => onTap(mediaEntity),
           );
         });
   }
